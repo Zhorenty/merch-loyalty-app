@@ -1,0 +1,46 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "merch-loyalty-app (dev, localhost)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=ENVIRONMENT=DEV",
+                "--dart-define=API_BASE_URL=http://127.0.0.1:8080"
+            ]
+        },
+        {
+            "name": "merch-loyalty-app (dev, android emulator)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=ENVIRONMENT=DEV",
+                "--dart-define=API_BASE_URL=http://10.0.2.2:8080"
+            ]
+        },
+        {
+            "name": "merch-loyalty-app (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define=ENVIRONMENT=DEV",
+                "--dart-define=API_BASE_URL=http://127.0.0.1:8080"
+            ]
+        },
+        {
+            "name": "merch-loyalty-app (release mode, prod)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "args": [
+                "--dart-define=ENVIRONMENT=PROD",
+                "--dart-define=API_BASE_URL=https://api.merch.store"
+            ]
+        }
+    ]
+}

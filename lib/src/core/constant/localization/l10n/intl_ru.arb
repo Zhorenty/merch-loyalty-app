@@ -1,0 +1,220 @@
+{
+  "@@locale": "ru",
+  "appTitle": "MERCH Касса",
+  "loginHint": "Логин",
+  "passwordOrPinHint": "Пароль или PIN",
+  "signIn": "Войти",
+  "enterLoginAndPassword": "Введи логин и пароль",
+  "scanHint": "Наведи на QR карты MERCH",
+  "cardNotFound": "Карта не найдена",
+  "gotIt": "Понятно",
+  "enterCode": "Ввести код",
+  "barcodeOrUuidHint": "MCH-… или UUID",
+  "cancel": "Отмена",
+  "find": "Найти",
+  "customer": "Клиент",
+  "guest": "Гость",
+  "points": "баллов",
+  "canRedeemFrom": "Можно списать от {min} баллов",
+  "@canRedeemFrom": {
+    "placeholders": {
+      "min": {"type": "int"}
+    }
+  },
+  "redeemFrom": "Списание от {min} баллов",
+  "@redeemFrom": {
+    "placeholders": {
+      "min": {"type": "int"}
+    }
+  },
+  "receipt": "Чек",
+  "close": "Закрыть",
+  "enterAmount": "Введи сумму чека",
+  "redeemBelowMin": "Списать можно от {min} баллов",
+  "@redeemBelowMin": {
+    "placeholders": {
+      "min": {"type": "int"}
+    }
+  },
+  "redeemLine": "Списать: {points} б. = {points} ₽",
+  "@redeemLine": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "payableLine": "К оплате: {amount} ₽",
+  "@payableLine": {
+    "placeholders": {
+      "amount": {"type": "int"}
+    }
+  },
+  "earnLine": "Начислим: {points} б.",
+  "@earnLine": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "back": "Назад",
+  "confirm": "Подтвердить",
+  "onCardPoints": "На карте {points} б.",
+  "@onCardPoints": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "amountHint": "Сумма чека, ₽",
+  "calculate": "Рассчитать",
+  "redeemPointsLabel": "Списать баллы",
+  "redeemMinHint": "Минимум для списания — {min} б.",
+  "@redeemMinHint": {
+    "placeholders": {
+      "min": {"type": "int"}
+    }
+  },
+  "payable": "К оплате",
+  "willEarn": "Начислим",
+  "offlineCommitDisabled": "Нет связи — чек не отправится",
+  "commitReceipt": "Провести чек",
+  "done": "Готово",
+  "pointsOnCard": "баллов на карте",
+  "redeemedPoints": "Списано {points} б.",
+  "@redeemedPoints": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "earnedPoints": "Начислено {points} б.",
+  "@earnedPoints": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "idempotentReplay": "Чек уже был проведён — баллы не менялись",
+  "issueCard": "Выдать карту",
+  "nameOptional": "Имя (необязательно)",
+  "phoneOptional": "Телефон (необязательно)",
+  "phoneConsent": "Клиент согласен на обработку телефона",
+  "phoneConsentRequired": "Нужно согласие, чтобы сохранить телефон",
+  "cardAlreadyExists": "Карта уже есть",
+  "showQrToCustomer": "Покажи QR клиенту",
+  "goToReceipt": "Сразу к чеку",
+  "anotherCard": "Ещё карту",
+  "shift": "Смена",
+  "shiftHistoryLater": "История смены появится после выкладки API",
+  "shiftHistoryNotCached": "Список чеков не фейкаем с телефона",
+  "emptyTitle": "Пока пусто",
+  "emptyScanHint": "Отсканируй карту на кассе",
+  "receiptSubtitle": "{time} · списано {redeem} · начислено {earn}",
+  "@receiptSubtitle": {
+    "placeholders": {
+      "time": {"type": "String"},
+      "redeem": {"type": "int"},
+      "earn": {"type": "int"}
+    }
+  },
+  "statusRefunded": "возврат",
+  "statusCommitted": "проведён",
+  "refundReceiptTitle": "Вернуть чек?",
+  "refundReceiptBody": "Сервер сторнирует начисление и вернёт списанные баллы.",
+  "refund": "Возврат",
+  "amountRub": "Сумма {amount} ₽",
+  "@amountRub": {
+    "placeholders": {
+      "amount": {"type": "int"}
+    }
+  },
+  "pointsAfter": "Баланс после {points} б.",
+  "@pointsAfter": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "customers": "Клиенты",
+  "customerSearchHint": "Barcode, телефон, имя",
+  "customersEmpty": "Никого не нашли",
+  "customersEmptyHint": "Попробуй barcode или телефон",
+  "blocked": "блок",
+  "adjustReasonRequired": "Укажи причину правки",
+  "adjustDeltaRequired": "Укажи ненулевую дельту",
+  "unblock": "Разблокировать",
+  "block": "Заблокировать",
+  "manualAdjust": "Ручная правка",
+  "deltaHint": "Дельта, можно минус",
+  "reasonHint": "Причина",
+  "changePoints": "Изменить баллы",
+  "staff": "Сотрудники",
+  "staffEmpty": "Нет сотрудников",
+  "staffEmptyHint": "Добавь менеджера или админа",
+  "active": "активен",
+  "inactive": "выкл",
+  "loginAndNameRequired": "Логин и имя обязательны",
+  "passwordRequired": "Задай пароль",
+  "newStaff": "Новый сотрудник",
+  "staffMember": "Сотрудник",
+  "nameHint": "Имя",
+  "newPasswordOptional": "Новый пароль (необязательно)",
+  "passwordHint": "Пароль",
+  "role": "Роль",
+  "roleManager": "Менеджер",
+  "roleAdmin": "Админ",
+  "staffActive": "Активен",
+  "create": "Создать",
+  "save": "Сохранить",
+  "stores": "Точки",
+  "storesEmpty": "Нет точек",
+  "storesEmptyHint": "Добавь магазин, чтобы бить чеки",
+  "addressMissing": "Адрес не указан",
+  "storeNameRequired": "Название обязательно",
+  "deleteStoreTitle": "Удалить точку?",
+  "delete": "Удалить",
+  "newStore": "Новая точка",
+  "store": "Точка",
+  "storeNameHint": "Название",
+  "addressHint": "Адрес",
+  "more": "Ещё",
+  "loyaltyRules": "Правила лояльности",
+  "settingsSaved": "Правила сохранены",
+  "settingEarnPercent": "Процент начисления",
+  "settingRedeemMin": "Минимум списания, б.",
+  "settingRedeemMaxShare": "Макс. доля чека, %",
+  "settingRedeemRate": "Курс списания, ₽ за балл",
+  "settingEarnMinReceipt": "Минимум чека для начисления, ₽",
+  "profile": "Профиль",
+  "employee": "Сотрудник",
+  "storeIdLabel": "Точка {id}",
+  "@storeIdLabel": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "appVersion": "Версия {version}+1",
+  "@appVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "closeShift": "Закрыть смену",
+  "updateApp": "Обнови приложение",
+  "updateAppBody": "Минимальная версия {version}. Сканер закрыт, пока не поставишь новую сборку.",
+  "@updateAppBody": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "downloadApk": "Скачать APK",
+  "initFailed": "Не удалось запустить приложение",
+  "retry": "Повторить",
+  "offlineRetry": "Нет связи. Проверь интернет и попробуй снова.",
+  "offlineBanner": "Нет связи. Чек без сети провести нельзя.",
+  "genericError": "Что-то пошло не так. Попробуй ещё раз.",
+  "tabCustomers": "Клиенты",
+  "tabTeam": "Команда",
+  "tabScan": "Скан",
+  "tabStores": "Точки",
+  "tabMore": "Ещё",
+  "tabShift": "Смена",
+  "tabCard": "Карта",
+  "tabReceipts": "Чеки",
+  "tabProfile": "Профиль",
+  "card": "Карта"
+}
