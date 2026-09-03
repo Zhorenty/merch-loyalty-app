@@ -58,15 +58,20 @@ final class InitializationProcessor {
     );
     await interceptor.preload();
 
-    final dio = Dio(
-      BaseOptions(
-        connectTimeout: const Duration(seconds: 8),
-        receiveTimeout: const Duration(seconds: 8),
-        sendTimeout: const Duration(seconds: 8),
-      ),
-    )..interceptors.add(interceptor);
-
-    final restClient = RestClientDio(baseUrl: config.baseUrl, dio: dio);
+    final RestClient restClient;
+    if (config.useMockApi) {
+      logger.warn('USE_MOCK_API=true: using in-memory fake backend');
+      restClient = RestClientMock();
+    } else {
+      final dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 8),
+          receiveTimeout: const Duration(seconds: 8),
+          sendTimeout: const Duration(seconds: 8),
+        ),
+      )..interceptors.add(interceptor);
+      restClient = RestClientDio(baseUrl: config.baseUrl, dio: dio);
+    }
     final api = MerchApi(restClient);
 
     authRepository = AuthRepositoryImpl(

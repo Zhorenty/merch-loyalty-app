@@ -14,6 +14,15 @@
             ]
         },
         {
+            "name": "merch-loyalty-app (mock backend, smoke test)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=ENVIRONMENT=DEV",
+                "--dart-define=USE_MOCK_API=true"
+            ]
+        },
+        {
             "name": "merch-loyalty-app (dev, android emulator)",
             "request": "launch",
             "type": "dart",

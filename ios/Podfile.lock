@@ -1,0 +1,52 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_native_splash (2.4.3):
+    - Flutter
+  - flutter_secure_storage (6.0.0):
+    - Flutter
+  - integration_test (0.0.1):
+    - Flutter
+  - package_info_plus (0.4.5):
+    - Flutter
+  - scan_snap (0.0.1):
+    - Flutter
+  - url_launcher_ios (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - scan_snap (from `.symlinks/plugins/scan_snap/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
+  scan_snap:
+    :path: ".symlinks/plugins/scan_snap/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
+  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  scan_snap: ffbfa475f15f13e5323e341e54c31308f8a87289
+  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
+
+PODFILE CHECKSUM: 05feb34a54d1cb7daf735c3bbc191fc80d57e480
+
+COCOAPODS: 1.16.2

@@ -286,6 +286,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "8.1.6"
+  flutter_driver:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_gen_core:
     dependency: transitive
     description:
@@ -389,6 +394,11 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fuchsia_remote_debug_protocol:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   glob:
     dependency: transitive
     description:
@@ -477,6 +487,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.1"
+  integration_test:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   intl:
     dependency: "direct main"
     description:
@@ -613,14 +628,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  mobile_scanner:
-    dependency: "direct main"
-    description:
-      name: mobile_scanner
-      sha256: "0b466a0a8a211b366c2e87f3345715faef9b6011c7147556ad22f37de6ba3173"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.11"
   nested:
     dependency: transitive
     description:
@@ -765,6 +772,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.2"
+  process:
+    dependency: transitive
+    description:
+      name: process
+      sha256: "4242ba3508d37e01808bdf71ad1d5bb93a8d671bf2e7450e6b1b353fb0808891"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.6"
   provider:
     dependency: transitive
     description:
@@ -821,6 +836,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  scan_snap:
+    dependency: "direct main"
+    description:
+      name: scan_snap
+      sha256: "2590772cbfc72d065b6f167ca271b0a2dbb32066bd1b2409dbe671460fec225e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
   shelf:
     dependency: transitive
     description:
@@ -882,6 +905,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  sync_http:
+    dependency: transitive
+    description:
+      name: sync_http
+      sha256: "7f0cd72eca000d2e026bcd6f990b81d0ca06022ef4e32fb257b30d3d1014a961"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   term_glyph:
     dependency: transitive
     description:
@@ -1058,6 +1089,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
+  webdriver:
+    dependency: transitive
+    description:
+      name: webdriver
+      sha256: "2f3a14ca026957870cfd9c635b83507e0e51d8091568e90129fbf805aba7cade"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   win32:
     dependency: transitive
     description:

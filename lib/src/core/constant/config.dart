@@ -13,6 +13,13 @@ class Config {
     return Environment.from(environment);
   }
 
+  /// Whether to use an in-memory fake backend instead of real HTTP calls.
+  ///
+  /// Enable with `--dart-define=USE_MOCK_API=true` to smoke-test the app
+  /// without running a backend. See [RestClientMock].
+  bool get useMockApi =>
+      const bool.fromEnvironment('USE_MOCK_API', defaultValue: false);
+
   /// HTTPS API MERCH. Override with `--dart-define=API_BASE_URL=...`.
   String get baseUrl {
     const override = String.fromEnvironment('API_BASE_URL');

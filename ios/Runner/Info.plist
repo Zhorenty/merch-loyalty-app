@@ -55,6 +55,8 @@
 		<string>Main</string>
 		<key>NSCameraUsageDescription</key>
 		<string>Камера нужна, чтобы сканировать QR карты MERCH на кассе.</string>
+		<key>io.flutter.embedded_views_preview</key>
+		<true/>
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>

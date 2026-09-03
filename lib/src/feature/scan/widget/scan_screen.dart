@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
 import 'package:merch/src/feature/scan/widget/scan_scope.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:scan_snap/scan_snap.dart' as scan_snap;
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -13,14 +13,12 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  final _controller = MobileScannerController(
-    detectionSpeed: DetectionSpeed.noDuplicates,
-  );
+  final _controller = scan_snap.ScanController();
   bool _torch = false;
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller.shutdown();
     super.dispose();
   }
 
@@ -33,7 +31,12 @@ class _ScanScreenState extends State<ScanScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          MobileScanner(controller: _controller, onDetect: _onDetect),
+          scan_snap.ScanView(
+            controller: _controller,
+            scanAreaScale: 0.55,
+            scanLineColor: Colors.white,
+            onCapture: _onCapture,
+          ),
           const _ScanMask(),
           SafeArea(
             child: Column(
@@ -51,8 +54,8 @@ class _ScanScreenState extends State<ScanScreen> {
                   children: [
                     _RoundAction(
                       icon: _torch ? Icons.flash_on : Icons.flash_off,
-                      onTap: () async {
-                        await _controller.toggleTorch();
+                      onTap: () {
+                        _controller.toggleTorchMode();
                         setState(() => _torch = !_torch);
                       },
                     ),
@@ -77,25 +80,25 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
-  Future<void> _onDetect(BarcodeCapture capture) async {
+  void _onCapture(String data) {
     if (ScanScope.of(context, listen: false).isProcessing) return;
-    final barcodes = capture.barcodes;
-    if (barcodes.isEmpty) return;
-    final raw = barcodes.first.rawValue;
-    if (raw == null || raw.isEmpty) return;
-    _lookup(raw.trim());
+    final barcode = data.trim();
+    if (barcode.isEmpty) return;
+    _controller.pause();
+    _lookup(barcode);
   }
 
   void _lookup(String barcode) {
     ScanScope.of(context, listen: false).lookup(
       barcode: barcode,
-      onSuccess: (customer) {
+      onSuccess: (customer) async {
         if (!mounted) return;
-        context.push('/overlay/customer', extra: customer);
+        await context.push('/overlay/customer', extra: customer);
+        if (mounted) _controller.resume();
       },
-      onError: (error) {
+      onError: (error) async {
         if (!mounted) return;
-        showDialog<void>(
+        await showDialog<void>(
           context: context,
           builder: (context) => AlertDialog(
             title: Text(context.l10n.cardNotFound),
@@ -108,6 +111,7 @@ class _ScanScreenState extends State<ScanScreen> {
             ],
           ),
         );
+        if (mounted) _controller.resume();
       },
     );
   }
