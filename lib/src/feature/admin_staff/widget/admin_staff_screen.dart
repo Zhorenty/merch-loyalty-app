@@ -54,9 +54,7 @@ class AdminStaffScreen extends StatelessWidget {
             return Card(
               child: ListTile(
                 title: Text(row.name),
-                subtitle: Text(
-                  '${row.login} · ${row.role == 'admin' ? l10n.roleAdmin : l10n.roleManager}',
-                ),
+                subtitle: Text('${row.login} · ${_roleLabel(l10n, row.role)}'),
                 trailing: Text(
                   row.active ? l10n.active : l10n.inactive,
                   style: TextStyle(
@@ -75,6 +73,13 @@ class AdminStaffScreen extends StatelessWidget {
   }
 }
 
+String _roleLabel(AppLocalizations l10n, String role) => switch (role) {
+  staffRoleAdmin => l10n.roleAdmin,
+  staffRoleShiftLead => l10n.roleShiftLead,
+  staffRoleCashier => l10n.roleCashier,
+  _ => role,
+};
+
 class StaffFormScreen extends StatefulWidget {
   const StaffFormScreen({this.staff, super.key});
 
@@ -88,7 +93,7 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
   late final TextEditingController _login;
   late final TextEditingController _name;
   late final TextEditingController _password;
-  String _role = 'manager';
+  String _role = staffRoleCashier;
   bool _active = true;
   bool _busy = false;
   String? _error;
@@ -100,9 +105,9 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
     _login = TextEditingController(text: staff?.login ?? '');
     _name = TextEditingController(text: staff?.name ?? '');
     _password = TextEditingController();
-    _role = staff == null
-        ? 'manager'
-        : (staff.role == 'admin' ? 'admin' : 'manager');
+    _role = staff != null && staffRoles.contains(staff.role)
+        ? staff.role
+        : staffRoleCashier;
     _active = staff?.active ?? true;
   }
 
@@ -199,8 +204,15 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
           const SizedBox(height: 8),
           SegmentedButton<String>(
             segments: [
-              ButtonSegment(value: 'manager', label: Text(l10n.roleManager)),
-              ButtonSegment(value: 'admin', label: Text(l10n.roleAdmin)),
+              ButtonSegment(
+                value: staffRoleCashier,
+                label: Text(l10n.roleCashier),
+              ),
+              ButtonSegment(
+                value: staffRoleShiftLead,
+                label: Text(l10n.roleShiftLead),
+              ),
+              ButtonSegment(value: staffRoleAdmin, label: Text(l10n.roleAdmin)),
             ],
             selected: {_role},
             onSelectionChanged: (value) => setState(() => _role = value.first),

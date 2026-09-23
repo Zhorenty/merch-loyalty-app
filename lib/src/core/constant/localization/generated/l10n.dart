@@ -674,10 +674,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Добавь менеджера или админа`
+  /// `Добавь кассира, старшего смены или админа`
   String get staffEmptyHint {
     return Intl.message(
-      'Добавь менеджера или админа',
+      'Добавь кассира, старшего смены или админа',
       name: 'staffEmptyHint',
       desc: '',
       args: [],
@@ -754,9 +754,19 @@ class AppLocalizations {
     return Intl.message('Роль', name: 'role', desc: '', args: []);
   }
 
-  /// `Менеджер`
-  String get roleManager {
-    return Intl.message('Менеджер', name: 'roleManager', desc: '', args: []);
+  /// `Кассир`
+  String get roleCashier {
+    return Intl.message('Кассир', name: 'roleCashier', desc: '', args: []);
+  }
+
+  /// `Старший смены`
+  String get roleShiftLead {
+    return Intl.message(
+      'Старший смены',
+      name: 'roleShiftLead',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Админ`

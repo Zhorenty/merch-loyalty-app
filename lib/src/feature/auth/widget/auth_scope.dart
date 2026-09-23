@@ -15,6 +15,8 @@ abstract interface class AuthController {
 
   bool get isAdmin;
 
+  bool get canRefund;
+
   bool get isProcessing;
 
   Object? get error;
@@ -59,6 +61,9 @@ class _AuthScopeState extends State<AuthScope> implements AuthController {
 
   @override
   bool get isAdmin => _state.session?.isAdmin ?? false;
+
+  @override
+  bool get canRefund => _state.session?.canRefund ?? false;
 
   @override
   bool get isProcessing => _state.isProcessing;

@@ -1,13 +1,29 @@
 enum AppRole { manager, admin }
 
+const staffRoleCashier = 'cashier';
+const staffRoleShiftLead = 'shift_lead';
+const staffRoleAdmin = 'admin';
+
+const staffRoles = {staffRoleCashier, staffRoleShiftLead, staffRoleAdmin};
+
 AppRole mapStaffRole(String role) {
   switch (role) {
-    case 'admin':
+    case staffRoleAdmin:
       return AppRole.admin;
     default:
       return AppRole.manager;
   }
 }
+
+bool canRefundRole(String role) =>
+    role == staffRoleShiftLead || role == staffRoleAdmin;
+
+String staffRoleLabel(String role) => switch (role) {
+  staffRoleAdmin => 'Админ',
+  staffRoleShiftLead => 'Старший смены',
+  staffRoleCashier => 'Кассир',
+  _ => role,
+};
 
 class Session {
   const Session({
@@ -36,7 +52,9 @@ class Session {
 
   bool get isAdmin => appRole == AppRole.admin;
 
-  String get roleLabel => isAdmin ? 'Админ' : 'Менеджер';
+  bool get canRefund => canRefundRole(staffRole);
+
+  String get roleLabel => staffRoleLabel(staffRole);
 
   Session copyWith({String? storeName, String? adminToken}) => Session(
     cashierToken: cashierToken,
@@ -222,8 +240,7 @@ class StaffRow {
   final String role;
   final bool active;
 
-  String get roleLabel =>
-      mapStaffRole(role) == AppRole.admin ? 'Админ' : 'Менеджер';
+  String get roleLabel => staffRoleLabel(role);
 }
 
 class StoreLocation {

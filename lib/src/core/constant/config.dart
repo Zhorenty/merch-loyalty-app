@@ -28,7 +28,7 @@ class Config {
     }
     return switch (environment) {
       Environment.dev => 'http://127.0.0.1:8080/',
-      Environment.prod => 'https://api.merch.store/',
+      Environment.prod => 'https://api.merch-wallet.ru/',
     };
   }
 }

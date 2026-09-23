@@ -2,7 +2,7 @@ name: merch
 description: Служебное приложение кассы лояльности MERCH.
 publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.10.0
@@ -48,6 +48,10 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/fonts/Roboto-Regular.ttf
+    - assets/fonts/Roboto-Medium.ttf
+    - assets/fonts/Roboto-Bold.ttf
+    - assets/fonts/MaterialIcons-Regular.otf
 
 flutter_gen:
   output: lib/src/core/constant/generated

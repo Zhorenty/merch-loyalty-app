@@ -19,7 +19,7 @@
             "type": "dart",
             "args": [
                 "--dart-define=ENVIRONMENT=PROD",
-                "--dart-define=API_BASE_URL=https://api.merch.store"
+                "--dart-define=API_BASE_URL=https://api.merch-wallet.ru"
             ]
         },
         {
@@ -57,7 +57,7 @@
             "flutterMode": "release",
             "args": [
                 "--dart-define=ENVIRONMENT=PROD",
-                "--dart-define=API_BASE_URL=https://api.merch.store"
+                "--dart-define=API_BASE_URL=https://api.merch-wallet.ru"
             ]
         }
     ]

@@ -46,3 +46,6 @@ app.*.map.json
 
 # Renamed release artifacts from scripts/build_and_rename.sh
 builds
+
+# Store listing frames from test/store/store_screenshots_test.dart
+/store/

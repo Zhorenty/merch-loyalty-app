@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../../model/models.dart';
 import '../rest_client.dart';
 
 /// {@template rest_client_mock}
@@ -24,25 +25,34 @@ final class RestClientMock implements RestClient {
   final List<Map<String, Object?>> _stores = [];
   final Map<String, String> _loyaltySettings = {
     'earn_percent': '5',
+    'earn_round': 'down',
+    'earn_base': 'after_store_discount_before_points',
+    'earn_min_receipt': '0',
+    'redeem_rate': '1',
     'redeem_min': '100',
     'redeem_max_share': '50',
-    'redeem_rate': '1',
-    'earn_min_receipt': '0',
+    'expire_days': '',
   };
 
+  String _cashierRole = staffRoleCashier;
+
   var _customerSeq = 1;
-  var _staffSeq = 3;
+  var _staffSeq = 4;
   var _storeSeq = 3;
   var _receiptSeq = 1000;
 
   void _seed() {
     _stores.addAll([
-      {
-        'id': 'store-1',
-        'name': 'Магазин на Тверской',
-        'address': 'Тверская, 1',
-      },
-      {'id': 'store-2', 'name': 'Магазин в Меге', 'address': 'ТЦ Мега, 2 этаж'},
+      _storeRow(
+        id: 'store-1',
+        name: 'Магазин на Тверской',
+        address: 'Тверская, 1',
+      ),
+      _storeRow(
+        id: 'store-2',
+        name: 'Магазин в Меге',
+        address: 'ТЦ Мега, 2 этаж',
+      ),
     ]);
     _staff.addAll([
       {
@@ -50,7 +60,7 @@ final class RestClientMock implements RestClient {
         'store_id': 'store-1',
         'login': 'admin',
         'name': 'Админ Админов',
-        'role': 'admin',
+        'role': staffRoleAdmin,
         'active': true,
       },
       {
@@ -58,7 +68,15 @@ final class RestClientMock implements RestClient {
         'store_id': 'store-1',
         'login': 'cashier',
         'name': 'Иван Кассиров',
-        'role': 'manager',
+        'role': staffRoleCashier,
+        'active': true,
+      },
+      {
+        'id': 'staff-3',
+        'store_id': 'store-1',
+        'login': 'lead',
+        'name': 'Старший смены',
+        'role': staffRoleShiftLead,
         'active': true,
       },
     ]);
@@ -205,7 +223,7 @@ final class RestClientMock implements RestClient {
       orElse: () => <String, Object?>{},
     );
     final isAdminLogin = existing.isNotEmpty
-        ? existing['role'] == 'admin'
+        ? existing['role'] == staffRoleAdmin
         : login.toLowerCase().contains('admin');
     final staff = existing.isNotEmpty
         ? existing
@@ -214,17 +232,23 @@ final class RestClientMock implements RestClient {
             'store_id': 'store-1',
             'login': login.isEmpty ? 'cashier' : login,
             'name': isAdminLogin ? 'Админ Админов' : 'Иван Кассиров',
-            'role': isAdminLogin ? 'admin' : 'manager',
+            'role': isAdminLogin ? staffRoleAdmin : staffRoleCashier,
             'active': true,
           };
     if (existing.isEmpty) _staff.add(staff);
+    _cashierRole = staff['role'] as String? ?? staffRoleCashier;
 
     return {
       'token': 'mock-cashier-token-${DateTime.now().millisecondsSinceEpoch}',
       'expires_at': DateTime.now()
           .add(const Duration(hours: 12))
           .toIso8601String(),
-      'staff': staff,
+      'staff': {
+        'id': staff['id'],
+        'name': staff['name'],
+        'role': staff['role'],
+        'store_id': staff['store_id'],
+      },
     };
   }
 
@@ -237,6 +261,7 @@ final class RestClientMock implements RestClient {
   Map<String, Object?> _lookup(Map<String, Object?> body) {
     final barcode = body['barcode'] as String? ?? '';
     final customer = _customerOrCreate(barcode);
+    _rejectIfBlocked(customer);
     return {
       'customer_id': customer['id'],
       'name': customer['blocked'] == true ? '' : customer['name'],
@@ -255,6 +280,16 @@ final class RestClientMock implements RestClient {
     final amountRub = (body['receipt_amount_rub'] as num?)?.toInt() ?? 0;
     final requestedPoints = (body['requested_points'] as num?)?.toInt() ?? 0;
     final customer = _customerOrCreate(barcode);
+    _rejectIfBlocked(customer);
+    if (amountRub < 0 || requestedPoints < 0) {
+      throw const StructuredBackendException(
+        error: {
+          'code': 'INVALID_REQUEST',
+          'message': 'Сумма и баллы не могут быть отрицательными',
+        },
+        statusCode: 422,
+      );
+    }
     final currentPoints = customer['points'] as int;
 
     final earnPercent =
@@ -262,21 +297,34 @@ final class RestClientMock implements RestClient {
     final redeemMin = int.tryParse(_loyaltySettings['redeem_min'] ?? '') ?? 100;
     final redeemMaxShare =
         int.tryParse(_loyaltySettings['redeem_max_share'] ?? '') ?? 50;
-    final earnMinReceipt =
-        int.tryParse(_loyaltySettings['earn_min_receipt'] ?? '') ?? 0;
+    final redeemRate = int.tryParse(_loyaltySettings['redeem_rate'] ?? '') ?? 1;
+    final maxByShare = redeemRate <= 0
+        ? 0
+        : (amountRub * redeemMaxShare / 100) ~/ redeemRate;
+    var maxPoints = min(maxByShare, currentPoints);
+    if (maxPoints < 0) maxPoints = 0;
+    if (maxPoints < redeemMin) maxPoints = 0;
 
-    final maxByShare = (amountRub * redeemMaxShare / 100).floor();
-    final maxPoints = min(maxByShare, currentPoints).clamp(0, 1 << 30);
-    final allowed =
-        customer['blocked'] != true &&
-        currentPoints >= redeemMin &&
-        maxPoints > 0 &&
-        amountRub >= earnMinReceipt;
-    final redeemPoints = allowed ? min(requestedPoints, maxPoints) : 0;
-    final redeemRub = redeemPoints;
+    String? code;
+    String? reason;
+    if (requestedPoints > 0 && requestedPoints < redeemMin) {
+      code = 'BELOW_MIN_REDEEM';
+      reason = 'Минимум для списания — $redeemMin баллов';
+    } else if (requestedPoints > currentPoints) {
+      code = 'INSUFFICIENT_POINTS';
+      reason = 'Недостаточно баллов';
+    } else if (requestedPoints * redeemRate >
+        amountRub * redeemMaxShare ~/ 100) {
+      code = 'EXCEEDS_RECEIPT_SHARE';
+      reason = 'Нельзя списать больше $redeemMaxShare% суммы чека';
+    }
+    final allowed = code == null;
+    final redeemPoints = allowed ? requestedPoints : 0;
+    final redeemRub = redeemPoints * redeemRate;
     final payableRub = amountRub - redeemRub;
-    final earnBaseRub = payableRub > 0 ? payableRub : amountRub;
-    final earnPoints = (earnBaseRub * earnPercent / 100).round();
+    final earnPoints = allowed
+        ? _earnPoints(amountRub, redeemPoints, earnPercent, redeemRate)
+        : 0;
 
     return {
       'allowed': allowed,
@@ -285,21 +333,48 @@ final class RestClientMock implements RestClient {
       'redeem_points': redeemPoints,
       'redeem_rub': redeemRub,
       'earn_points': earnPoints,
-      'payable_rub': payableRub,
+      'payable_rub': payableRub < 0 ? 0 : payableRub,
       'current_points': currentPoints,
-      if (!allowed) 'code': 'not_allowed',
-      if (!allowed)
-        'reason': 'Недостаточно баллов или сумма чека меньше минимальной',
+      if (!allowed) 'code': code,
+      if (!allowed) 'reason': reason,
     };
   }
 
   Map<String, Object?> _commit(Map<String, Object?> body) {
     final receiptId = body['receipt_id'] as String? ?? '';
+    final barcode = body['barcode'] as String? ?? '';
+    final amountRub = (body['receipt_amount_rub'] as num?)?.toInt() ?? 0;
+    final redeemPoints = (body['redeem_points'] as num?)?.toInt() ?? 0;
+    final storeId = (body['store_id'] as String?)?.isNotEmpty == true
+        ? body['store_id'] as String
+        : 'store-1';
+    if (amountRub < 0 || redeemPoints < 0) {
+      throw const StructuredBackendException(
+        error: {
+          'code': 'INVALID_REQUEST',
+          'message': 'Сумма и баллы не могут быть отрицательными',
+        },
+        statusCode: 422,
+      );
+    }
     final existing = _receipts.firstWhere(
       (r) => r['receipt_id'] == receiptId,
       orElse: () => <String, Object?>{},
     );
     if (existing.isNotEmpty) {
+      final same =
+          existing['barcode'] == barcode &&
+          existing['amount_rub'] == amountRub &&
+          existing['redeem_points'] == redeemPoints;
+      if (!same) {
+        throw const StructuredBackendException(
+          error: {
+            'code': 'DUPLICATE_RECEIPT',
+            'message': 'Чек уже проведён с другими данными',
+          },
+          statusCode: 409,
+        );
+      }
       return {
         'receipt_id': existing['receipt_id'],
         'customer_id': existing['customer_id'],
@@ -311,18 +386,17 @@ final class RestClientMock implements RestClient {
       };
     }
 
-    final barcode = body['barcode'] as String? ?? '';
-    final amountRub = (body['receipt_amount_rub'] as num?)?.toInt() ?? 0;
-    final redeemPoints = (body['redeem_points'] as num?)?.toInt() ?? 0;
-    final storeId = body['store_id'] as String?;
     final customer = _customerOrCreate(barcode);
-
+    _rejectIfBlocked(customer);
     final earnPercent =
         int.tryParse(_loyaltySettings['earn_percent'] ?? '') ?? 5;
-    final payableRub = amountRub - redeemPoints;
-    final earnBaseRub = payableRub > 0 ? payableRub : amountRub;
-    final earnPoints = (earnBaseRub * earnPercent / 100).round();
-
+    final redeemRate = int.tryParse(_loyaltySettings['redeem_rate'] ?? '') ?? 1;
+    final earnPoints = _earnPoints(
+      amountRub,
+      redeemPoints,
+      earnPercent,
+      redeemRate,
+    );
     final pointsAfter = (customer['points'] as int) - redeemPoints + earnPoints;
     customer['points'] = pointsAfter;
 
@@ -330,15 +404,14 @@ final class RestClientMock implements RestClient {
       'receipt_id': receiptId.isEmpty
           ? 'mock-receipt-${_receiptSeq++}'
           : receiptId,
-      'id': receiptId.isEmpty ? 'mock-receipt-${_receiptSeq++}' : receiptId,
-      'created_at': DateTime.now().toIso8601String(),
+      'created_at': DateTime.now().toUtc().toIso8601String(),
       'barcode': barcode,
       'customer_id': customer['id'],
       'name': customer['name'],
       'amount_rub': amountRub,
       'redeem_points': redeemPoints,
       'earn_points': earnPoints,
-      'status': 'completed',
+      'status': 'committed',
       'points_after': pointsAfter,
       'store_id': storeId,
     };
@@ -356,6 +429,15 @@ final class RestClientMock implements RestClient {
   }
 
   Map<String, Object?> _refund(Map<String, Object?> body) {
+    if (!canRefundRole(_cashierRole)) {
+      throw const StructuredBackendException(
+        error: {
+          'code': 'STAFF_FORBIDDEN',
+          'message': 'Возврат доступен старшему смены или админу',
+        },
+        statusCode: 403,
+      );
+    }
     final receiptId = body['receipt_id'] as String? ?? '';
     final receipt = _receipts.firstWhere(
       (r) => r['receipt_id'] == receiptId,
@@ -363,22 +445,31 @@ final class RestClientMock implements RestClient {
     );
     if (receipt.isEmpty) {
       throw const StructuredBackendException(
-        error: {'code': 'not_found', 'message': 'Чек не найден'},
-        statusCode: 404,
+        error: {'code': 'INVALID_REQUEST', 'message': 'Чек не найден'},
+        statusCode: 422,
       );
     }
     final barcode = receipt['barcode'] as String;
     final customer = _customerOrCreate(barcode);
-    if (receipt['status'] != 'refunded') {
-      final redeemPoints = receipt['redeem_points'] as int;
+    final already = receipt['status'] == 'refunded';
+    if (!already) {
+      var points = customer['points'] as int;
       final earnPoints = receipt['earn_points'] as int;
-      final pointsAfter =
-          (customer['points'] as int) + redeemPoints - earnPoints;
-      customer['points'] = pointsAfter;
+      final redeemPoints = receipt['redeem_points'] as int;
+      if (earnPoints > 0) {
+        points -= earnPoints > points ? points : earnPoints;
+      }
+      if (redeemPoints > 0) points += redeemPoints;
+      customer['points'] = points;
       receipt['status'] = 'refunded';
-      receipt['points_after'] = pointsAfter;
+      receipt['points_after'] = points;
     }
-    return {'points': customer['points']};
+    return {
+      'receipt_id': receiptId,
+      'customer_id': customer['id'],
+      'points': receipt['points_after'],
+      'idempotent_replay': already,
+    };
   }
 
   Map<String, Object?> _enroll(Map<String, Object?> body) {
@@ -392,10 +483,13 @@ final class RestClientMock implements RestClient {
       points: 0,
     );
     final customer = _customersByBarcode[barcode]!;
+    final id = customer['id'] as String;
     return {
-      'customer_id': customer['id'],
+      'customer_id': id,
       'barcode': barcode,
-      'add_page': 'https://example.com/wallet/add/$barcode',
+      'apple_url': 'http://localhost:8080/public/passes/apple/$id.pkpass',
+      'google_save_url': '',
+      'add_page': 'http://localhost:8080/card/add/$id',
       'created': true,
     };
   }
@@ -441,7 +535,7 @@ final class RestClientMock implements RestClient {
       orElse: () => <String, Object?>{},
     );
     if (customer.isNotEmpty) customer['blocked'] = blocked;
-    return {};
+    return {'id': id, 'blocked': blocked};
   }
 
   Map<String, Object?> _adjust(Map<String, Object?> body) {
@@ -450,32 +544,54 @@ final class RestClientMock implements RestClient {
     final customer = _customerOrCreate(barcode);
     final points = ((customer['points'] as int) + delta).clamp(0, 1 << 30);
     customer['points'] = points;
-    return {'points': points};
+    return {
+      'customer_id': customer['id'],
+      'barcode': customer['barcode'],
+      'points': points,
+    };
   }
 
   Map<String, Object?> _listStaff() => {'staff': _staff};
 
   Map<String, Object?> _createStaff(Map<String, Object?> body) {
+    final login = (body['login'] as String? ?? '').trim();
+    final name = (body['name'] as String? ?? '').trim();
+    final password = body['password'] as String? ?? '';
+    final role = body['role'] as String? ?? '';
+    if (login.isEmpty ||
+        name.isEmpty ||
+        password.isEmpty ||
+        !staffRoles.contains(role)) {
+      throw const StructuredBackendException(
+        error: {
+          'code': 'INVALID_REQUEST',
+          'message': 'login, name, password и role обязательны',
+        },
+        statusCode: 422,
+      );
+    }
+    final storeId = body['store_id'] as String?;
     final staff = {
       'id': 'staff-${_staffSeq++}',
-      'store_id': body['store_id'] as String? ?? '',
-      'login': body['login'] as String? ?? '',
-      'name': body['name'] as String? ?? '',
-      'role': body['role'] as String? ?? 'manager',
-      'active': true,
+      'store_id': storeId == null || storeId.isEmpty ? 'store-1' : storeId,
+      'login': login,
+      'name': name,
+      'role': role,
+      'active': body['active'] as bool? ?? true,
     };
     _staff.add(staff);
     return staff;
   }
 
   Map<String, Object?> _patchStaff(String id, Map<String, Object?> body) {
+    _requireKnownStaffRole(body['role']);
     final staff = _staff.firstWhere(
       (s) => s['id'] == id,
       orElse: () => <String, Object?>{},
     );
     if (staff.isEmpty) {
       throw const StructuredBackendException(
-        error: {'code': 'not_found', 'message': 'Сотрудник не найден'},
+        error: {'code': 'INVALID_REQUEST', 'message': 'Сотрудник не найден'},
         statusCode: 404,
       );
     }
@@ -488,34 +604,49 @@ final class RestClientMock implements RestClient {
   Map<String, Object?> _listStores() => {'stores': _stores};
 
   Map<String, Object?> _createStore(Map<String, Object?> body) {
-    final store = {
-      'id': 'store-${_storeSeq++}',
-      'name': body['name'] as String? ?? '',
-      'address': body['address'] as String? ?? '',
-    };
+    final name = (body['name'] as String? ?? '').trim();
+    if (name.isEmpty) {
+      throw const StructuredBackendException(
+        error: {'code': 'INVALID_REQUEST', 'message': 'name обязателен'},
+        statusCode: 422,
+      );
+    }
+    final store = _storeRow(
+      id: 'store-${_storeSeq++}',
+      name: name,
+      address: body['address'] as String? ?? '',
+    );
     _stores.add(store);
     return store;
   }
 
   Map<String, Object?> _patchStore(String id, Map<String, Object?> body) {
     final store = _stores.firstWhere(
-      (s) => s['id'] == id,
+      (s) => s['ID'] == id,
       orElse: () => <String, Object?>{},
     );
     if (store.isEmpty) {
       throw const StructuredBackendException(
-        error: {'code': 'not_found', 'message': 'Магазин не найден'},
+        error: {'code': 'INVALID_REQUEST', 'message': 'Точка не найдена'},
         statusCode: 404,
       );
     }
-    for (final key in ['name', 'address']) {
-      if (body.containsKey(key)) store[key] = body[key];
-    }
+    final name = body['name'] as String? ?? '';
+    final address = body['address'] as String? ?? '';
+    if (name.isNotEmpty) store['Name'] = name;
+    if (address.isNotEmpty) store['Address'] = address;
     return store;
   }
 
   Map<String, Object?>? _deleteStore(String id) {
-    _stores.removeWhere((s) => s['id'] == id);
+    final before = _stores.length;
+    _stores.removeWhere((s) => s['ID'] == id);
+    if (_stores.length == before) {
+      throw const StructuredBackendException(
+        error: {'code': 'INVALID_REQUEST', 'message': 'Точка не найдена'},
+        statusCode: 404,
+      );
+    }
     return null;
   }
 
@@ -528,6 +659,43 @@ final class RestClientMock implements RestClient {
     }
     return Map<String, Object?>.from(_loyaltySettings);
   }
+
+  void _requireKnownStaffRole(Object? role) {
+    if (role is! String || role.isEmpty || staffRoles.contains(role)) return;
+    throw const StructuredBackendException(
+      error: {'code': 'INVALID_REQUEST', 'message': 'Неизвестная роль'},
+      statusCode: 422,
+    );
+  }
+
+  void _rejectIfBlocked(Map<String, Object?> customer) {
+    if (customer['blocked'] == true) {
+      throw const StructuredBackendException(
+        error: {'code': 'CUSTOMER_BLOCKED', 'message': 'Карта заблокирована'},
+        statusCode: 403,
+      );
+    }
+  }
+
+  int _earnPoints(int amountRub, int redeemPoints, int earnPercent, int rate) {
+    final minReceipt =
+        int.tryParse(_loyaltySettings['earn_min_receipt'] ?? '') ?? 0;
+    if (amountRub < minReceipt) return 0;
+    var base = amountRub - redeemPoints * rate;
+    if (base < 0) base = 0;
+    return base * earnPercent ~/ 100;
+  }
+
+  Map<String, Object?> _storeRow({
+    required String id,
+    required String name,
+    required String address,
+  }) => {
+    'ID': id,
+    'Name': name,
+    'Address': address,
+    'CreatedAt': DateTime.now().toUtc().toIso8601String(),
+  };
 
   // --- Helpers ----------------------------------------------------------
 

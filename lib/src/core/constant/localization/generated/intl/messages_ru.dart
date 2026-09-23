@@ -186,7 +186,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "retry": MessageLookupByLibrary.simpleMessage("Повторить"),
     "role": MessageLookupByLibrary.simpleMessage("Роль"),
     "roleAdmin": MessageLookupByLibrary.simpleMessage("Админ"),
-    "roleManager": MessageLookupByLibrary.simpleMessage("Менеджер"),
+    "roleCashier": MessageLookupByLibrary.simpleMessage("Кассир"),
+    "roleShiftLead": MessageLookupByLibrary.simpleMessage("Старший смены"),
     "save": MessageLookupByLibrary.simpleMessage("Сохранить"),
     "scanHint": MessageLookupByLibrary.simpleMessage(
       "Наведи на QR карты MERCH",
@@ -222,7 +223,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "staffActive": MessageLookupByLibrary.simpleMessage("Активен"),
     "staffEmpty": MessageLookupByLibrary.simpleMessage("Нет сотрудников"),
     "staffEmptyHint": MessageLookupByLibrary.simpleMessage(
-      "Добавь менеджера или админа",
+      "Добавь кассира, старшего смены или админа",
     ),
     "staffMember": MessageLookupByLibrary.simpleMessage("Сотрудник"),
     "statusCommitted": MessageLookupByLibrary.simpleMessage("проведён"),

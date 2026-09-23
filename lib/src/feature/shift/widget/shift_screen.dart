@@ -4,6 +4,7 @@ import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
 import 'package:merch/src/core/widget/states.dart';
+import 'package:merch/src/feature/auth/widget/auth_scope.dart';
 import 'package:merch/src/feature/shift/bloc/shift_state.dart';
 import 'package:merch/src/feature/shift/widget/shift_scope.dart';
 
@@ -152,7 +153,7 @@ class _ReceiptDetailSheetState extends State<ReceiptDetailSheet> {
             ),
           ],
           const SizedBox(height: 16),
-          if (!row.isRefunded)
+          if (!row.isRefunded && AuthScope.of(context).canRefund)
             ElevatedButton(
               onPressed: _busy ? null : _refund,
               child: _busy
