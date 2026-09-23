@@ -14,6 +14,15 @@
             ]
         },
         {
+            "name": "merch-loyalty-app (dev, prod)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=ENVIRONMENT=PROD",
+                "--dart-define=API_BASE_URL=https://api.merch.store"
+            ]
+        },
+        {
             "name": "merch-loyalty-app (mock backend, smoke test)",
             "request": "launch",
             "type": "dart",
