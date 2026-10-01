@@ -16,6 +16,7 @@ abstract interface class AdminStaffController {
     required String name,
     required String password,
     required String role,
+    required String storeId,
     required void Function() onSuccess,
     required void Function(Object error) onError,
   });
@@ -26,18 +27,20 @@ abstract interface class AdminStaffController {
     required String name,
     required String password,
     required String role,
-    required bool active,
+    required String storeId,
+    required void Function() onSuccess,
+    required void Function(Object error) onError,
+  });
+
+  void delete({
+    required String id,
     required void Function() onSuccess,
     required void Function(Object error) onError,
   });
 }
 
 class AdminStaffScope extends StatefulWidget {
-  const AdminStaffScope({
-    required this.child,
-    this.autoload = true,
-    super.key,
-  });
+  const AdminStaffScope({required this.child, this.autoload = true, super.key});
 
   final Widget child;
   final bool autoload;
@@ -82,6 +85,7 @@ class _AdminStaffScopeState extends State<AdminStaffScope>
     required String name,
     required String password,
     required String role,
+    required String storeId,
     required void Function() onSuccess,
     required void Function(Object error) onError,
   }) => _bloc.add(
@@ -90,6 +94,7 @@ class _AdminStaffScopeState extends State<AdminStaffScope>
       name: name,
       password: password,
       role: role,
+      storeId: storeId,
       onSuccess: onSuccess,
       onError: onError,
     ),
@@ -102,7 +107,7 @@ class _AdminStaffScopeState extends State<AdminStaffScope>
     required String name,
     required String password,
     required String role,
-    required bool active,
+    required String storeId,
     required void Function() onSuccess,
     required void Function(Object error) onError,
   }) => _bloc.add(
@@ -112,10 +117,19 @@ class _AdminStaffScopeState extends State<AdminStaffScope>
       name: name,
       password: password,
       role: role,
-      active: active,
+      storeId: storeId,
       onSuccess: onSuccess,
       onError: onError,
     ),
+  );
+
+  @override
+  void delete({
+    required String id,
+    required void Function() onSuccess,
+    required void Function(Object error) onError,
+  }) => _bloc.add(
+    AdminStaffEvent.deleted(id: id, onSuccess: onSuccess, onError: onError),
   );
 
   @override

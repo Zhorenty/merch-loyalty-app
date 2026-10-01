@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
+import 'package:merch/src/core/widget/app_dialog.dart';
 import 'package:merch/src/core/widget/states.dart';
 import 'package:merch/src/feature/admin_stores/bloc/admin_stores_state.dart';
 import 'package:merch/src/feature/admin_stores/widget/admin_stores_scope.dart';
@@ -32,6 +33,7 @@ class AdminStoresScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.stores)),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'admin-stores-fab',
         onPressed: () => _open(context),
         child: const Icon(Icons.add),
       ),
@@ -125,21 +127,12 @@ class _StoreFormScreenState extends State<StoreFormScreen> {
 
   Future<void> _delete() async {
     final l10n = context.l10n;
-    final ok = await showDialog<bool>(
+    final ok = await showConfirmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deleteStoreTitle),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
+      title: l10n.deleteStoreTitle,
+      confirmLabel: l10n.delete,
+      cancelLabel: l10n.cancel,
+      destructive: true,
     );
     if (ok != true || !mounted) return;
     setState(() => _busy = true);

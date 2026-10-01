@@ -15,6 +15,8 @@ final class AdminCustomersBloc
         final AdminCustomersEvent$Searched e => _search(e, emit),
         final AdminCustomersEvent$Blocked e => _block(e),
         final AdminCustomersEvent$Adjusted e => _adjust(e),
+        final AdminCustomersEvent$Deleted e => _delete(e),
+        final AdminCustomersEvent$Restored e => _restore(e),
       },
     );
   }
@@ -27,7 +29,10 @@ final class AdminCustomersBloc
   ) async {
     emit(const AdminCustomersState.processing());
     try {
-      final customers = await _repository.search(event.query);
+      final customers = await _repository.search(
+        event.query,
+        status: event.status,
+      );
       emit(AdminCustomersState.idle(customers: customers));
     } on Object catch (e, stackTrace) {
       emit(AdminCustomersState.error(error: e));
@@ -57,6 +62,26 @@ final class AdminCustomersBloc
         reason: event.reason,
       );
       event.onSuccess(points);
+    } on Object catch (e, stackTrace) {
+      event.onError(e);
+      onError(e, stackTrace);
+    }
+  }
+
+  Future<void> _delete(AdminCustomersEvent$Deleted event) async {
+    try {
+      await _repository.delete(event.id);
+      event.onSuccess();
+    } on Object catch (e, stackTrace) {
+      event.onError(e);
+      onError(e, stackTrace);
+    }
+  }
+
+  Future<void> _restore(AdminCustomersEvent$Restored event) async {
+    try {
+      await _repository.restore(event.id);
+      event.onSuccess();
     } on Object catch (e, stackTrace) {
       event.onError(e);
       onError(e, stackTrace);

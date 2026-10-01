@@ -9,6 +9,7 @@ abstract interface class AdminStaffDataSource {
     required String name,
     required String password,
     required String role,
+    required String storeId,
   });
 
   Future<StaffRow> patch(
@@ -17,8 +18,10 @@ abstract interface class AdminStaffDataSource {
     String? name,
     String? password,
     String? role,
-    bool? active,
+    String? storeId,
   });
+
+  Future<void> delete(String id);
 }
 
 final class AdminStaffDataSourceNetwork implements AdminStaffDataSource {
@@ -35,11 +38,13 @@ final class AdminStaffDataSourceNetwork implements AdminStaffDataSource {
     required String name,
     required String password,
     required String role,
+    required String storeId,
   }) => _api.createStaff(
     login: login,
     name: name,
     password: password,
     role: role,
+    storeId: storeId,
   );
 
   @override
@@ -49,13 +54,16 @@ final class AdminStaffDataSourceNetwork implements AdminStaffDataSource {
     String? name,
     String? password,
     String? role,
-    bool? active,
+    String? storeId,
   }) => _api.patchStaff(
     id,
     login: login,
     name: name,
     password: password,
     role: role,
-    active: active,
+    storeId: storeId,
   );
+
+  @override
+  Future<void> delete(String id) => _api.deleteStaff(id);
 }

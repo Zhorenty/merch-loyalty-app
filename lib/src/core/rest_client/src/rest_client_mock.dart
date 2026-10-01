@@ -37,7 +37,7 @@ final class RestClientMock implements RestClient {
   String _cashierRole = staffRoleCashier;
 
   var _customerSeq = 1;
-  var _staffSeq = 4;
+  var _staffSeq = 3;
   var _storeSeq = 3;
   var _receiptSeq = 1000;
 
@@ -71,14 +71,6 @@ final class RestClientMock implements RestClient {
         'role': staffRoleCashier,
         'active': true,
       },
-      {
-        'id': 'staff-3',
-        'store_id': 'store-1',
-        'login': 'lead',
-        'name': 'Старший смены',
-        'role': staffRoleShiftLead,
-        'active': true,
-      },
     ]);
     _seedCustomer(
       barcode: '1234567890123',
@@ -108,6 +100,7 @@ final class RestClientMock implements RestClient {
       'phone': phone,
       'points': points,
       'blocked': false,
+      'deleted': false,
     };
   }
 
@@ -178,6 +171,9 @@ final class RestClientMock implements RestClient {
       return _receiptById(segments[2]);
     }
     if (_is(segments, ['admin', 'customers'])) return _searchCustomers(q);
+    if (_is(segments, ['admin', 'customers', '*', 'restore'])) {
+      return _setCustomerDeleted(segments[2], false);
+    }
     if (_is(segments, ['admin', 'customers', '*', 'block'])) {
       return _setBlocked(segments[2], true);
     }
@@ -188,7 +184,11 @@ final class RestClientMock implements RestClient {
     if (_is(segments, ['admin', 'staff'])) {
       return method == 'GET' ? _listStaff() : _createStaff(b);
     }
+    if (_is(segments, ['admin', 'customers', '*'])) {
+      if (method == 'DELETE') return _setCustomerDeleted(segments[2], true);
+    }
     if (_is(segments, ['admin', 'staff', '*'])) {
+      if (method == 'DELETE') return _deleteStaff(segments[2]);
       return _patchStaff(segments[2], b);
     }
     if (_is(segments, ['admin', 'stores'])) {
@@ -236,6 +236,12 @@ final class RestClientMock implements RestClient {
             'active': true,
           };
     if (existing.isEmpty) _staff.add(staff);
+    if (staff['deleted'] == true || staff['active'] == false) {
+      throw const StructuredBackendException(
+        error: {'code': 'UNAUTHORIZED', 'message': 'Сотрудник неактивен'},
+        statusCode: 401,
+      );
+    }
     _cashierRole = staff['role'] as String? ?? staffRoleCashier;
 
     return {
@@ -248,6 +254,7 @@ final class RestClientMock implements RestClient {
         'name': staff['name'],
         'role': staff['role'],
         'store_id': staff['store_id'],
+        'store_name': _storeNameFor(staff['store_id']),
       },
     };
   }
@@ -261,7 +268,7 @@ final class RestClientMock implements RestClient {
   Map<String, Object?> _lookup(Map<String, Object?> body) {
     final barcode = body['barcode'] as String? ?? '';
     final customer = _customerOrCreate(barcode);
-    _rejectIfBlocked(customer);
+    _rejectIfUnusable(customer);
     return {
       'customer_id': customer['id'],
       'name': customer['blocked'] == true ? '' : customer['name'],
@@ -280,7 +287,7 @@ final class RestClientMock implements RestClient {
     final amountRub = (body['receipt_amount_rub'] as num?)?.toInt() ?? 0;
     final requestedPoints = (body['requested_points'] as num?)?.toInt() ?? 0;
     final customer = _customerOrCreate(barcode);
-    _rejectIfBlocked(customer);
+    _rejectIfUnusable(customer);
     if (amountRub < 0 || requestedPoints < 0) {
       throw const StructuredBackendException(
         error: {
@@ -387,7 +394,7 @@ final class RestClientMock implements RestClient {
     }
 
     final customer = _customerOrCreate(barcode);
-    _rejectIfBlocked(customer);
+    _rejectIfUnusable(customer);
     final earnPercent =
         int.tryParse(_loyaltySettings['earn_percent'] ?? '') ?? 5;
     final redeemRate = int.tryParse(_loyaltySettings['redeem_rate'] ?? '') ?? 1;
@@ -431,10 +438,7 @@ final class RestClientMock implements RestClient {
   Map<String, Object?> _refund(Map<String, Object?> body) {
     if (!canRefundRole(_cashierRole)) {
       throw const StructuredBackendException(
-        error: {
-          'code': 'STAFF_FORBIDDEN',
-          'message': 'Возврат доступен старшему смены или админу',
-        },
+        error: {'code': 'STAFF_FORBIDDEN', 'message': 'Недостаточно прав'},
         statusCode: 403,
       );
     }
@@ -520,7 +524,17 @@ final class RestClientMock implements RestClient {
 
   Map<String, Object?> _searchCustomers(Map<String, String?> query) {
     final q = (query['q'] ?? '').toLowerCase();
+    final status = query['status'] ?? 'all';
     final customers = _customersByBarcode.values.where((c) {
+      final deleted = c['deleted'] == true;
+      final blocked = c['blocked'] == true;
+      final matchesStatus = switch (status) {
+        'active' => !deleted && !blocked,
+        'blocked' => !deleted && blocked,
+        'deleted' => deleted,
+        _ => !deleted,
+      };
+      if (!matchesStatus) return false;
       if (q.isEmpty) return true;
       return (c['name'] as String).toLowerCase().contains(q) ||
           (c['barcode'] as String).toLowerCase().contains(q) ||
@@ -529,11 +543,32 @@ final class RestClientMock implements RestClient {
     return {'customers': customers};
   }
 
+  Map<String, Object?> _setCustomerDeleted(String id, bool deleted) {
+    final customer = _customersByBarcode.values.firstWhere(
+      (c) => c['id'] == id,
+      orElse: () => <String, Object?>{},
+    );
+    if (customer.isEmpty) {
+      throw const StructuredBackendException(
+        error: {'code': 'CUSTOMER_NOT_FOUND', 'message': 'Клиент не найден'},
+        statusCode: 404,
+      );
+    }
+    customer['deleted'] = deleted;
+    return customer;
+  }
+
   Map<String, Object?> _setBlocked(String id, bool blocked) {
     final customer = _customersByBarcode.values.firstWhere(
       (c) => c['id'] == id,
       orElse: () => <String, Object?>{},
     );
+    if (customer['deleted'] == true) {
+      throw const StructuredBackendException(
+        error: {'code': 'CUSTOMER_DELETED', 'message': 'Карта удалена'},
+        statusCode: 422,
+      );
+    }
     if (customer.isNotEmpty) customer['blocked'] = blocked;
     return {'id': id, 'blocked': blocked};
   }
@@ -551,7 +586,9 @@ final class RestClientMock implements RestClient {
     };
   }
 
-  Map<String, Object?> _listStaff() => {'staff': _staff};
+  Map<String, Object?> _listStaff() => {
+    'staff': _staff.where((s) => s['deleted'] != true).map(_staffOut).toList(),
+  };
 
   Map<String, Object?> _createStaff(Map<String, Object?> body) {
     final login = (body['login'] as String? ?? '').trim();
@@ -574,13 +611,13 @@ final class RestClientMock implements RestClient {
     final staff = {
       'id': 'staff-${_staffSeq++}',
       'store_id': storeId == null || storeId.isEmpty ? 'store-1' : storeId,
-      'login': login,
+      'login': login.toLowerCase(),
       'name': name,
       'role': role,
       'active': body['active'] as bool? ?? true,
     };
     _staff.add(staff);
-    return staff;
+    return _staffOut(staff);
   }
 
   Map<String, Object?> _patchStaff(String id, Map<String, Object?> body) {
@@ -596,9 +633,39 @@ final class RestClientMock implements RestClient {
       );
     }
     for (final key in ['login', 'name', 'role', 'store_id', 'active']) {
-      if (body.containsKey(key)) staff[key] = body[key];
+      if (!body.containsKey(key)) continue;
+      staff[key] = key == 'login'
+          ? (body[key] as String? ?? '').trim().toLowerCase()
+          : body[key];
     }
-    return staff;
+    return _staffOut(staff);
+  }
+
+  Map<String, Object?>? _deleteStaff(String id) {
+    final staff = _staff.firstWhere(
+      (s) => s['id'] == id,
+      orElse: () => <String, Object?>{},
+    );
+    if (staff.isEmpty || staff['deleted'] == true) {
+      throw const StructuredBackendException(
+        error: {'code': 'INVALID_REQUEST', 'message': 'Сотрудник не найден'},
+        statusCode: 404,
+      );
+    }
+    staff['deleted'] = true;
+    return null;
+  }
+
+  Map<String, Object?> _staffOut(Map<String, Object?> staff) => {
+    ...staff,
+    'store_name': _storeNameFor(staff['store_id']),
+  };
+
+  String _storeNameFor(Object? id) {
+    for (final store in _stores) {
+      if (store['ID'] == id) return store['Name'] as String? ?? '';
+    }
+    return '';
   }
 
   Map<String, Object?> _listStores() => {'stores': _stores};
@@ -668,7 +735,13 @@ final class RestClientMock implements RestClient {
     );
   }
 
-  void _rejectIfBlocked(Map<String, Object?> customer) {
+  void _rejectIfUnusable(Map<String, Object?> customer) {
+    if (customer['deleted'] == true) {
+      throw const StructuredBackendException(
+        error: {'code': 'CUSTOMER_DELETED', 'message': 'Карта удалена'},
+        statusCode: 422,
+      );
+    }
     if (customer['blocked'] == true) {
       throw const StructuredBackendException(
         error: {'code': 'CUSTOMER_BLOCKED', 'message': 'Карта заблокирована'},

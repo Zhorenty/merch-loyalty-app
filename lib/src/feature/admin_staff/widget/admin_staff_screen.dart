@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
+import 'package:merch/src/core/widget/app_dialog.dart';
 import 'package:merch/src/core/widget/states.dart';
 import 'package:merch/src/feature/admin_staff/bloc/admin_staff_state.dart';
 import 'package:merch/src/feature/admin_staff/widget/admin_staff_scope.dart';
+import 'package:merch/src/feature/auth/widget/auth_scope.dart';
+import 'package:merch/src/feature/initialization/widget/dependencies_scope.dart';
 
 class AdminStaffScreen extends StatelessWidget {
   const AdminStaffScreen({super.key});
@@ -32,6 +35,7 @@ class AdminStaffScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.staff)),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'admin-staff-fab',
         onPressed: () => _open(context),
         child: const Icon(Icons.add),
       ),
@@ -54,14 +58,8 @@ class AdminStaffScreen extends StatelessWidget {
             return Card(
               child: ListTile(
                 title: Text(row.name),
-                subtitle: Text('${row.login} · ${_roleLabel(l10n, row.role)}'),
-                trailing: Text(
-                  row.active ? l10n.active : l10n.inactive,
-                  style: TextStyle(
-                    color: row.active
-                        ? context.colorScheme.tertiary
-                        : context.colorScheme.error,
-                  ),
+                subtitle: Text(
+                  '${row.login} · ${_roleLabel(l10n, row.role)} · ${_storeLabel(row)}',
                 ),
                 onTap: () => _open(context, staff: row),
               ),
@@ -75,10 +73,12 @@ class AdminStaffScreen extends StatelessWidget {
 
 String _roleLabel(AppLocalizations l10n, String role) => switch (role) {
   staffRoleAdmin => l10n.roleAdmin,
-  staffRoleShiftLead => l10n.roleShiftLead,
-  staffRoleCashier => l10n.roleCashier,
+  staffRoleCashier || 'shift_lead' => l10n.roleCashier,
   _ => role,
 };
+
+String _storeLabel(StaffRow row) =>
+    row.storeName.isNotEmpty ? row.storeName : row.storeId;
 
 class StaffFormScreen extends StatefulWidget {
   const StaffFormScreen({this.staff, super.key});
@@ -94,7 +94,9 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
   late final TextEditingController _name;
   late final TextEditingController _password;
   String _role = staffRoleCashier;
-  bool _active = true;
+  String? _storeId;
+  List<StoreLocation> _stores = const [];
+  bool _storesLoading = true;
   bool _busy = false;
   String? _error;
 
@@ -108,7 +110,29 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
     _role = staff != null && staffRoles.contains(staff.role)
         ? staff.role
         : staffRoleCashier;
-    _active = staff?.active ?? true;
+    _storeId = staff?.storeId;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadStores());
+  }
+
+  Future<void> _loadStores() async {
+    try {
+      final stores = await DependenciesScope.of(
+        context,
+      ).adminStoresRepository.list();
+      if (!mounted) return;
+      setState(() {
+        _stores = stores;
+        _storesLoading = false;
+        final known = stores.any((store) => store.id == _storeId);
+        if (!known) _storeId = stores.isEmpty ? null : stores.first.id;
+      });
+    } on Object catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _storesLoading = false;
+        _error = context.errorMessage(error);
+      });
+    }
   }
 
   @override
@@ -127,6 +151,11 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
     }
     if (widget.staff == null && _password.text.isEmpty) {
       setState(() => _error = l10n.passwordRequired);
+      return;
+    }
+    final storeId = _storeId;
+    if (storeId == null || storeId.isEmpty) {
+      setState(() => _error = l10n.storeRequired);
       return;
     }
     setState(() {
@@ -153,6 +182,7 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
         name: _name.text.trim(),
         password: _password.text,
         role: _role,
+        storeId: storeId,
         onSuccess: onSuccess,
         onError: onError,
       );
@@ -163,11 +193,44 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
         name: _name.text.trim(),
         password: _password.text,
         role: _role,
-        active: _active,
+        storeId: storeId,
         onSuccess: onSuccess,
         onError: onError,
       );
     }
+  }
+
+  Future<void> _delete() async {
+    final staff = widget.staff;
+    if (staff == null) return;
+    final l10n = context.l10n;
+    final ok = await showConfirmDialog(
+      context: context,
+      title: l10n.deleteStaffTitle,
+      message: l10n.deleteStaffBody,
+      confirmLabel: l10n.delete,
+      cancelLabel: l10n.cancel,
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    AdminStaffScope.of(context, listen: false).delete(
+      id: staff.id,
+      onSuccess: () {
+        if (!mounted) return;
+        Navigator.pop(context, true);
+      },
+      onError: (error) {
+        if (!mounted) return;
+        setState(() {
+          _busy = false;
+          _error = context.errorMessage(error);
+        });
+      },
+    );
   }
 
   @override
@@ -208,21 +271,30 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
                 value: staffRoleCashier,
                 label: Text(l10n.roleCashier),
               ),
-              ButtonSegment(
-                value: staffRoleShiftLead,
-                label: Text(l10n.roleShiftLead),
-              ),
               ButtonSegment(value: staffRoleAdmin, label: Text(l10n.roleAdmin)),
             ],
             selected: {_role},
             onSelectionChanged: (value) => setState(() => _role = value.first),
           ),
-          if (widget.staff != null)
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.staffActive),
-              value: _active,
-              onChanged: (value) => setState(() => _active = value),
+          const SizedBox(height: 16),
+          Text(l10n.store, style: context.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          if (_storesLoading)
+            const LinearProgressIndicator()
+          else
+            DropdownButtonFormField<String>(
+              key: ValueKey(_storeId),
+              initialValue: _stores.any((store) => store.id == _storeId)
+                  ? _storeId
+                  : null,
+              hint: Text(l10n.storeRequired),
+              items: [
+                for (final store in _stores)
+                  DropdownMenuItem(value: store.id, child: Text(store.name)),
+              ],
+              onChanged: _busy
+                  ? null
+                  : (value) => setState(() => _storeId = value),
             ),
           if (_error != null) ...[
             const SizedBox(height: 12),
@@ -238,6 +310,18 @@ class _StaffFormScreenState extends State<StaffFormScreen> {
             onPressed: _busy ? null : _save,
             child: Text(widget.staff == null ? l10n.create : l10n.save),
           ),
+          if (widget.staff != null &&
+              widget.staff!.id != AuthScope.of(context).session?.staffId) ...[
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: _busy ? null : _delete,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.colorScheme.error,
+                side: BorderSide(color: context.colorScheme.error),
+              ),
+              child: Text(l10n.delete),
+            ),
+          ],
         ],
       ),
     );

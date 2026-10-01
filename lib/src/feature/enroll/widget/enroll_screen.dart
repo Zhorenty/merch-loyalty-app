@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
+import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
-import 'package:merch/src/feature/auth/widget/auth_scope.dart';
 import 'package:merch/src/feature/enroll/widget/enroll_scope.dart';
+import 'package:merch/src/feature/initialization/widget/dependencies_scope.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class EnrollScreen extends StatefulWidget {
@@ -80,14 +82,22 @@ class _EnrollScreenState extends State<EnrollScreen> {
             ),
           ] else ...[
             Text(
-              l10n.showQrToCustomer,
+              l10n.cardReady,
               style: context.textTheme.headlineLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.saveCardHint,
+              style: context.textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             Center(
               child: QrImageView(
-                data: result.barcode,
+                data: result.addPage.isNotEmpty
+                    ? result.addPage
+                    : result.barcode,
                 size: 240,
                 backgroundColor: Colors.white,
               ),
@@ -100,22 +110,56 @@ class _EnrollScreenState extends State<EnrollScreen> {
                 fontFamily: 'monospace',
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () => _copyBarcode(result.barcode),
+              child: Text(l10n.copyBarcode),
+            ),
+            const SizedBox(height: 12),
             ElevatedButton(
-              onPressed: () => context.go(
-                AuthScope.of(context).isAdmin ? '/admin/scan' : '/scan',
-              ),
-              child: Text(l10n.goToReceipt),
+              onPressed: () => _openSale(result),
+              child: Text(l10n.goToPurchase),
             ),
             const SizedBox(height: 12),
             OutlinedButton(
-              onPressed: () => EnrollScope.of(context).reset(),
+              onPressed: () {
+                _nameController.clear();
+                _phoneController.clear();
+                setState(() {
+                  _consent = false;
+                  _error = null;
+                });
+                EnrollScope.of(context).reset();
+              },
               child: Text(l10n.anotherCard),
             ),
           ],
         ],
       ),
     );
+  }
+
+  Future<void> _copyBarcode(String barcode) async {
+    await Clipboard.setData(ClipboardData(text: barcode));
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.l10n.barcodeCopied)));
+  }
+
+  Future<void> _openSale(EnrollResult result) async {
+    try {
+      final customer = await DependenciesScope.of(
+        context,
+      ).scanRepository.lookup(result.barcode);
+      if (!mounted) return;
+      await context.push('/overlay/customer', extra: customer);
+    } on Object catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.errorMessage(error))));
+    }
   }
 
   void _submit() {

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
+import 'package:merch/src/core/widget/app_dialog.dart';
 import 'package:merch/src/core/widget/states.dart';
 import 'package:merch/src/feature/auth/widget/auth_scope.dart';
 import 'package:merch/src/feature/receipt/widget/receipt_scope.dart';
@@ -64,9 +65,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 Text(
-                  customer.name.trim().isEmpty
-                      ? l10n.guest
-                      : customer.name,
+                  customer.name.trim().isEmpty ? l10n.guest : customer.name,
                   style: context.textTheme.titleLarge,
                 ),
                 const SizedBox(height: 4),
@@ -131,19 +130,14 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                         decoration: const InputDecoration(hintText: '0'),
                         onChanged: (value) {
                           final parsed = int.tryParse(value) ?? 0;
-                          setState(
-                            () => _redeem = parsed.clamp(0, maxPoints),
-                          );
+                          setState(() => _redeem = parsed.clamp(0, maxPoints));
                         },
                         onEditingComplete: () =>
                             _requestQuote(requested: _redeem),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      '= $_redeem ₽',
-                      style: context.textTheme.titleMedium,
-                    ),
+                    Text('= $_redeem ₽', style: context.textTheme.titleMedium),
                   ],
                 ),
                 if (redeemInvalid)
@@ -162,10 +156,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                   value: '$_payablePreview ₽',
                   emphasize: true,
                 ),
-                _SummaryTile(
-                  label: l10n.willEarn,
-                  value: '$_earnPreview б.',
-                ),
+                _SummaryTile(label: l10n.willEarn, value: '$_earnPreview б.'),
                 if (state.error != null) ...[
                   const SizedBox(height: 16),
                   Text(
@@ -233,8 +224,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     return quote?.payableRub ?? (amount - _redeem).clamp(0, amount);
   }
 
-  int get _earnPreview =>
-      ReceiptScope.of(context).state.quote?.earnPoints ?? 0;
+  int get _earnPreview => ReceiptScope.of(context).state.quote?.earnPoints ?? 0;
 
   void _onAmountChanged() {
     _debounce?.cancel();
@@ -259,10 +249,8 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     if (amount == null || amount <= 0) return;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          customer.name.trim().isEmpty ? l10n.guest : customer.name,
-        ),
+      builder: (context) => AppDialog(
+        title: customer.name.trim().isEmpty ? l10n.guest : customer.name,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,13 +261,14 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.back),
-          ),
-          TextButton(
+          AppDialogAction(
+            label: l10n.confirm,
+            primary: true,
             onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.confirm),
+          ),
+          AppDialogAction(
+            label: l10n.back,
+            onPressed: () => Navigator.pop(context, false),
           ),
         ],
       ),

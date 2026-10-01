@@ -14,6 +14,7 @@ final class AdminStaffBloc extends Bloc<AdminStaffEvent, AdminStaffState>
         final AdminStaffEvent$Started _ => _load(emit),
         final AdminStaffEvent$Created e => _create(e),
         final AdminStaffEvent$Updated e => _update(e),
+        final AdminStaffEvent$Deleted e => _delete(e),
       },
     );
   }
@@ -38,6 +39,7 @@ final class AdminStaffBloc extends Bloc<AdminStaffEvent, AdminStaffState>
         name: event.name,
         password: event.password,
         role: event.role,
+        storeId: event.storeId,
       );
       event.onSuccess();
     } on Object catch (e, stackTrace) {
@@ -54,8 +56,18 @@ final class AdminStaffBloc extends Bloc<AdminStaffEvent, AdminStaffState>
         name: event.name,
         password: event.password,
         role: event.role,
-        active: event.active,
+        storeId: event.storeId,
       );
+      event.onSuccess();
+    } on Object catch (e, stackTrace) {
+      event.onError(e);
+      onError(e, stackTrace);
+    }
+  }
+
+  Future<void> _delete(AdminStaffEvent$Deleted event) async {
+    try {
+      await _repository.delete(event.id);
       event.onSuccess();
     } on Object catch (e, stackTrace) {
       event.onError(e);

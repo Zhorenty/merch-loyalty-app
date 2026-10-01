@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:merch/src/core/constant/config.dart';
-import 'package:merch/src/core/constant/localization/generated/l10n.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/theme/theme.dart';
@@ -172,6 +171,7 @@ class _Target {
 const _targets = [
   _Target('store/appstore/iphone-6.7', Size(1290, 2796)),
   _Target('store/appstore/iphone-6.5', Size(1284, 2778)),
+  _Target('store/appstore/ipad-13', Size(2064, 2752)),
   _Target('store/play', Size(1080, 1920)),
 ];
 
@@ -184,10 +184,7 @@ Future<void> _shoot(
 }) async {
   await tester.binding.setSurfaceSize(logical);
   await tester.pumpWidget(
-    RepaintBoundary(
-      key: const Key('shot'),
-      child: child,
-    ),
+    RepaintBoundary(key: const Key('shot'), child: child),
   );
   await tester.pump();
   final context = tester.element(find.byKey(const Key('shot')));
@@ -312,103 +309,106 @@ class _Poster extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: ColoredBox(
-      color: _navy,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final width = constraints.maxWidth;
-          final titleSize = width * 0.078;
-          return Stack(
-            children: [
-              Positioned(
-                right: -width * 0.18,
-                bottom: width * 0.05,
-                child: Container(
-                  width: width * 0.95,
-                  height: width * 0.95,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _navySoft,
+        color: _navy,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final titleSize = width * 0.078;
+            return Stack(
+              children: [
+                Positioned(
+                  right: -width * 0.18,
+                  bottom: width * 0.05,
+                  child: Container(
+                    width: width * 0.95,
+                    height: width * 0.95,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _navySoft,
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  width * 0.075,
-                  width * 0.09,
-                  width * 0.075,
-                  width * 0.06,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(width * 0.03),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: width * 0.03,
-                          vertical: width * 0.015,
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    width * 0.075,
+                    width * 0.09,
+                    width * 0.075,
+                    width * 0.06,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(width * 0.03),
                         ),
-                        child: Image.asset(
-                          'assets/images/merch-logo.png',
-                          height: width * 0.055,
-                          fit: BoxFit.contain,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: width * 0.03,
+                            vertical: width * 0.015,
+                          ),
+                          child: Image.asset(
+                            'assets/images/merch-logo.png',
+                            height: width * 0.055,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: width * 0.045),
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontFamily: 'Roboto',
-                        color: Colors.white,
-                        fontSize: titleSize,
-                        height: 1.02,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -1,
+                      SizedBox(height: width * 0.045),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          color: Colors.white,
+                          fontSize: titleSize,
+                          height: 1.02,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -1,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: width * 0.025),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontFamily: 'Roboto',
-                        color: Colors.white.withValues(alpha: 0.78),
-                        fontSize: width * 0.032,
-                        height: 1.25,
-                        fontWeight: FontWeight.w500,
+                      SizedBox(height: width * 0.025),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          color: Colors.white.withValues(alpha: 0.78),
+                          fontSize: width * 0.032,
+                          height: 1.25,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: width * 0.05),
-                    Expanded(
-                      child: Center(
-                        child: AspectRatio(
-                          aspectRatio: 390 / 844,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(width * 0.045),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.28),
-                                  blurRadius: width * 0.04,
-                                  offset: Offset(0, width * 0.015),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(width * 0.012),
-                              child: ClipRRect(
+                      SizedBox(height: width * 0.05),
+                      Expanded(
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: 390 / 844,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(
-                                  width * 0.036,
+                                  width * 0.045,
                                 ),
-                                child: FittedBox(
-                                  child: SizedBox(
-                                    width: 390,
-                                    height: 844,
-                                    child: screen,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.28),
+                                    blurRadius: width * 0.04,
+                                    offset: Offset(0, width * 0.015),
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(width * 0.012),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                    width * 0.036,
+                                  ),
+                                  child: FittedBox(
+                                    child: SizedBox(
+                                      width: 390,
+                                      height: 844,
+                                      child: screen,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -416,14 +416,13 @@ class _Poster extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
-      ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -646,7 +645,16 @@ final class _CustomersRepository implements AdminCustomersRepository {
   Future<void> block(String id) async {}
 
   @override
-  Future<List<AdminCustomer>> search(String query) async => const [];
+  Future<void> delete(String id) async {}
+
+  @override
+  Future<void> restore(String id) async {}
+
+  @override
+  Future<List<AdminCustomer>> search(
+    String query, {
+    String status = 'all',
+  }) async => const [];
 
   @override
   Future<void> unblock(String id) async {}
@@ -659,7 +667,11 @@ final class _StaffRepository implements AdminStaffRepository {
     required String name,
     required String password,
     required String role,
+    required String storeId,
   }) => throw UnimplementedError();
+
+  @override
+  Future<void> delete(String id) async {}
 
   @override
   Future<List<StaffRow>> list() async => const [];
@@ -671,7 +683,7 @@ final class _StaffRepository implements AdminStaffRepository {
     String? name,
     String? password,
     String? role,
-    bool? active,
+    String? storeId,
   }) => throw UnimplementedError();
 }
 

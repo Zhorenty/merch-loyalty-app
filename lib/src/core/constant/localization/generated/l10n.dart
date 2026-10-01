@@ -674,10 +674,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Добавь кассира, старшего смены или админа`
+  /// `Добавь кассира или админа`
   String get staffEmptyHint {
     return Intl.message(
-      'Добавь кассира, старшего смены или админа',
+      'Добавь кассира или админа',
       name: 'staffEmptyHint',
       desc: '',
       args: [],
@@ -969,14 +969,154 @@ class AppLocalizations {
     );
   }
 
-  /// `Закрыть смену`
+  /// `Выйти`
   String get closeShift {
+    return Intl.message('Выйти', name: 'closeShift', desc: '', args: []);
+  }
+
+  /// `Выйти`
+  String get signOut {
+    return Intl.message('Выйти', name: 'signOut', desc: '', args: []);
+  }
+
+  /// `Выбери точку`
+  String get storeRequired {
     return Intl.message(
-      'Закрыть смену',
-      name: 'closeShift',
+      'Выбери точку',
+      name: 'storeRequired',
       desc: '',
       args: [],
     );
+  }
+
+  /// `Удалить сотрудника?`
+  String get deleteStaffTitle {
+    return Intl.message(
+      'Удалить сотрудника?',
+      name: 'deleteStaffTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Он больше не сможет войти. Чеки останутся.`
+  String get deleteStaffBody {
+    return Intl.message(
+      'Он больше не сможет войти. Чеки останутся.',
+      name: 'deleteStaffBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Все`
+  String get customerFilterAll {
+    return Intl.message('Все', name: 'customerFilterAll', desc: '', args: []);
+  }
+
+  /// `Активные`
+  String get customerFilterActive {
+    return Intl.message(
+      'Активные',
+      name: 'customerFilterActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Заблокированные`
+  String get customerFilterBlocked {
+    return Intl.message(
+      'Заблокированные',
+      name: 'customerFilterBlocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Удалённые`
+  String get customerFilterDeleted {
+    return Intl.message(
+      'Удалённые',
+      name: 'customerFilterDeleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Удалить карту?`
+  String get deleteCardTitle {
+    return Intl.message(
+      'Удалить карту?',
+      name: 'deleteCardTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Карта скроется с кассы. Чеки и баллы останутся, её можно найти в фильтре «Удалённые».`
+  String get deleteCardBody {
+    return Intl.message(
+      'Карта скроется с кассы. Чеки и баллы останутся, её можно найти в фильтре «Удалённые».',
+      name: 'deleteCardBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Восстановить`
+  String get restoreCard {
+    return Intl.message(
+      'Восстановить',
+      name: 'restoreCard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Удалена`
+  String get cardDeleted {
+    return Intl.message('Удалена', name: 'cardDeleted', desc: '', args: []);
+  }
+
+  /// `Карта готова`
+  String get cardReady {
+    return Intl.message('Карта готова', name: 'cardReady', desc: '', args: []);
+  }
+
+  /// `Клиент сканирует QR и сохраняет карту в Wallet`
+  String get saveCardHint {
+    return Intl.message(
+      'Клиент сканирует QR и сохраняет карту в Wallet',
+      name: 'saveCardHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Скопировать штрихкод`
+  String get copyBarcode {
+    return Intl.message(
+      'Скопировать штрихкод',
+      name: 'copyBarcode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Штрихкод скопирован`
+  String get barcodeCopied {
+    return Intl.message(
+      'Штрихкод скопирован',
+      name: 'barcodeCopied',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `К покупке`
+  String get goToPurchase {
+    return Intl.message('К покупке', name: 'goToPurchase', desc: '', args: []);
   }
 
   /// `Обнови приложение`

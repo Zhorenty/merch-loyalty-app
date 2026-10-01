@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
+import 'package:merch/src/core/widget/app_dialog.dart';
 import 'package:merch/src/feature/scan/widget/scan_scope.dart';
 import 'package:scan_snap/scan_snap.dart' as scan_snap;
 
@@ -98,18 +99,11 @@ class _ScanScreenState extends State<ScanScreen> {
       },
       onError: (error) async {
         if (!mounted) return;
-        await showDialog<void>(
+        await showInfoDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text(context.l10n.cardNotFound),
-            content: Text(context.errorMessage(error)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(context.l10n.gotIt),
-              ),
-            ],
-          ),
+          title: context.l10n.cardNotFound,
+          message: context.errorMessage(error),
+          actionLabel: context.l10n.gotIt,
         );
         if (mounted) _controller.resume();
       },
@@ -117,32 +111,15 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Future<void> _manualEntry() async {
-    final controller = TextEditingController();
     final l10n = context.l10n;
-    final value = await showDialog<String>(
+    final value = await showInputDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.enterCode),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          textCapitalization: TextCapitalization.characters,
-          decoration: InputDecoration(hintText: l10n.barcodeOrUuidHint),
-          onSubmitted: (v) => Navigator.pop(context, v),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: Text(l10n.find),
-          ),
-        ],
-      ),
+      title: l10n.enterCode,
+      hint: l10n.barcodeOrUuidHint,
+      confirmLabel: l10n.find,
+      cancelLabel: l10n.cancel,
+      textCapitalization: TextCapitalization.characters,
     );
-    controller.dispose();
     final barcode = value?.trim();
     if (barcode == null || barcode.isEmpty) return;
     _lookup(barcode);

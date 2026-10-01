@@ -5,9 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
+import 'package:merch/src/core/widget/app_dialog.dart';
 import 'package:merch/src/core/widget/states.dart';
 import 'package:merch/src/feature/admin_customers/bloc/admin_customers_state.dart';
 import 'package:merch/src/feature/admin_customers/widget/admin_customers_scope.dart';
+import 'package:merch/src/feature/enroll/widget/enroll_scope.dart';
+import 'package:merch/src/feature/enroll/widget/enroll_screen.dart';
 
 class AdminCustomersScreen extends StatefulWidget {
   const AdminCustomersScreen({super.key});
@@ -19,6 +22,7 @@ class AdminCustomersScreen extends StatefulWidget {
 class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
   final _query = TextEditingController();
   Timer? _debounce;
+  String _status = 'all';
 
   @override
   void dispose() {
@@ -31,7 +35,10 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (!mounted) return;
-      AdminCustomersScope.of(context, listen: false).search(value.trim());
+      AdminCustomersScope.of(
+        context,
+        listen: false,
+      ).search(value.trim(), status: _status);
     });
   }
 
@@ -45,7 +52,10 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
       ),
     );
     if (!mounted) return;
-    AdminCustomersScope.of(context, listen: false).search(_query.text.trim());
+    AdminCustomersScope.of(
+      context,
+      listen: false,
+    ).search(_query.text.trim(), status: _status);
   }
 
   @override
@@ -56,17 +66,61 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.customers)),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'admin-customers-fab',
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const EnrollScope(child: EnrollScreen()),
+          ),
+        ),
+        child: const Icon(Icons.add),
+      ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _query,
-              decoration: InputDecoration(
-                hintText: l10n.customerSearchHint,
-                prefixIcon: const Icon(Icons.search),
-              ),
-              onChanged: _onQuery,
+            child: Column(
+              children: [
+                TextField(
+                  controller: _query,
+                  decoration: InputDecoration(
+                    hintText: l10n.customerSearchHint,
+                    prefixIcon: const Icon(Icons.search),
+                  ),
+                  onChanged: _onQuery,
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  key: ValueKey(_status),
+                  initialValue: _status,
+                  items: [
+                    DropdownMenuItem(
+                      value: 'all',
+                      child: Text(l10n.customerFilterAll),
+                    ),
+                    DropdownMenuItem(
+                      value: 'active',
+                      child: Text(l10n.customerFilterActive),
+                    ),
+                    DropdownMenuItem(
+                      value: 'blocked',
+                      child: Text(l10n.customerFilterBlocked),
+                    ),
+                    DropdownMenuItem(
+                      value: 'deleted',
+                      child: Text(l10n.customerFilterDeleted),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() => _status = value);
+                    AdminCustomersScope.of(
+                      context,
+                      listen: false,
+                    ).search(_query.text.trim(), status: value);
+                  },
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -74,7 +128,8 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
               AdminCustomersState$Processing() => const SkeletonList(),
               AdminCustomersState$Error(:final error) => ErrorState(
                 message: context.errorMessage(error),
-                onRetry: () => controller.search(_query.text.trim()),
+                onRetry: () =>
+                    controller.search(_query.text.trim(), status: _status),
               ),
               AdminCustomersState$Idle(:final customers)
                   when customers.isEmpty =>
@@ -95,7 +150,14 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
                         '${customer.barcode} · ${customer.points} б.',
                         style: const TextStyle(fontFamily: 'monospace'),
                       ),
-                      trailing: customer.blocked
+                      trailing: customer.deleted
+                          ? Text(
+                              l10n.cardDeleted,
+                              style: TextStyle(
+                                color: context.colorScheme.error,
+                              ),
+                            )
+                          : customer.blocked
                           ? Text(
                               l10n.blocked,
                               style: TextStyle(
@@ -164,6 +226,69 @@ class _AdminCustomerSheetState extends State<AdminCustomerSheet> {
             phone: _customer.phone,
             points: _customer.points,
             blocked: !_customer.blocked,
+            deleted: _customer.deleted,
+          );
+        });
+      },
+      onError: (error) {
+        if (!mounted) return;
+        setState(() {
+          _busy = false;
+          _error = context.errorMessage(error);
+        });
+      },
+    );
+  }
+
+  Future<void> _delete() async {
+    final l10n = context.l10n;
+    final ok = await showConfirmDialog(
+      context: context,
+      title: l10n.deleteCardTitle,
+      message: l10n.deleteCardBody,
+      confirmLabel: l10n.delete,
+      cancelLabel: l10n.cancel,
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    AdminCustomersScope.of(context, listen: false).delete(
+      id: _customer.id,
+      onSuccess: () {
+        if (!mounted) return;
+        Navigator.pop(context);
+      },
+      onError: (error) {
+        if (!mounted) return;
+        setState(() {
+          _busy = false;
+          _error = context.errorMessage(error);
+        });
+      },
+    );
+  }
+
+  void _restore() {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    AdminCustomersScope.of(context, listen: false).restore(
+      id: _customer.id,
+      onSuccess: () {
+        if (!mounted) return;
+        setState(() {
+          _busy = false;
+          _customer = AdminCustomer(
+            id: _customer.id,
+            barcode: _customer.barcode,
+            name: _customer.name,
+            phone: _customer.phone,
+            points: _customer.points,
+            blocked: _customer.blocked,
           );
         });
       },
@@ -208,6 +333,7 @@ class _AdminCustomerSheetState extends State<AdminCustomerSheet> {
             phone: _customer.phone,
             points: points,
             blocked: _customer.blocked,
+            deleted: _customer.deleted,
           );
           _delta.clear();
           _reason.clear();
@@ -252,27 +378,26 @@ class _AdminCustomerSheetState extends State<AdminCustomerSheet> {
           if (_customer.phone.isNotEmpty)
             Text(_customer.phone, textAlign: TextAlign.center),
           const SizedBox(height: 24),
-          OutlinedButton(
-            onPressed: _busy ? null : _toggleBlock,
-            child: Text(_customer.blocked ? l10n.unblock : l10n.block),
-          ),
-          const SizedBox(height: 24),
-          Text(l10n.manualAdjust, style: context.textTheme.titleMedium),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _delta,
-            keyboardType: const TextInputType.numberWithOptions(signed: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'-?\d*')),
-            ],
-            decoration: InputDecoration(hintText: l10n.deltaHint),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _reason,
-            decoration: InputDecoration(hintText: l10n.reasonHint),
-            onChanged: (_) => setState(() {}),
-          ),
+          if (_customer.deleted)
+            ElevatedButton(
+              onPressed: _busy ? null : _restore,
+              child: Text(l10n.restoreCard),
+            )
+          else ...[
+            OutlinedButton(
+              onPressed: _busy ? null : _toggleBlock,
+              child: Text(_customer.blocked ? l10n.unblock : l10n.block),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: _busy ? null : _delete,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.colorScheme.error,
+                side: BorderSide(color: context.colorScheme.error),
+              ),
+              child: Text(l10n.delete),
+            ),
+          ],
           if (_error != null) ...[
             const SizedBox(height: 12),
             Text(
@@ -282,11 +407,30 @@ class _AdminCustomerSheetState extends State<AdminCustomerSheet> {
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _busy || _reason.text.trim().isEmpty ? null : _adjust,
-            child: Text(l10n.changePoints),
-          ),
+          if (!_customer.deleted) ...[
+            const SizedBox(height: 24),
+            Text(l10n.manualAdjust, style: context.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _delta,
+              keyboardType: const TextInputType.numberWithOptions(signed: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'-?\d*')),
+              ],
+              decoration: InputDecoration(hintText: l10n.deltaHint),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _reason,
+              decoration: InputDecoration(hintText: l10n.reasonHint),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _busy || _reason.text.trim().isEmpty ? null : _adjust,
+              child: Text(l10n.changePoints),
+            ),
+          ],
         ],
       ),
     );

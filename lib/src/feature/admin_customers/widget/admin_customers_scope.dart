@@ -9,7 +9,7 @@ import 'package:merch/src/feature/initialization/widget/dependencies_scope.dart'
 abstract interface class AdminCustomersController {
   AdminCustomersState get state;
 
-  void search(String query);
+  void search(String query, {String status = 'all'});
 
   void setBlocked({
     required String id,
@@ -23,6 +23,18 @@ abstract interface class AdminCustomersController {
     required int delta,
     required String reason,
     required void Function(int points) onSuccess,
+    required void Function(Object error) onError,
+  });
+
+  void delete({
+    required String id,
+    required void Function() onSuccess,
+    required void Function(Object error) onError,
+  });
+
+  void restore({
+    required String id,
+    required void Function() onSuccess,
     required void Function(Object error) onError,
   });
 }
@@ -57,7 +69,7 @@ class _AdminCustomersScopeState extends State<AdminCustomersScope>
       repository: DependenciesScope.of(context).adminCustomersRepository,
     );
     if (widget.autoload) {
-      _bloc.add(const AdminCustomersEvent.searched(''));
+      _bloc.add(const AdminCustomersEvent.searched('', status: 'all'));
     }
   }
 
@@ -71,8 +83,8 @@ class _AdminCustomersScopeState extends State<AdminCustomersScope>
   AdminCustomersState get state => _bloc.state;
 
   @override
-  void search(String query) =>
-      _bloc.add(AdminCustomersEvent.searched(query));
+  void search(String query, {String status = 'all'}) =>
+      _bloc.add(AdminCustomersEvent.searched(query, status: status));
 
   @override
   void setBlocked({
@@ -101,6 +113,28 @@ class _AdminCustomersScopeState extends State<AdminCustomersScope>
       barcode: barcode,
       delta: delta,
       reason: reason,
+      onSuccess: onSuccess,
+      onError: onError,
+    ),
+  );
+
+  @override
+  void delete({
+    required String id,
+    required void Function() onSuccess,
+    required void Function(Object error) onError,
+  }) => _bloc.add(
+    AdminCustomersEvent.deleted(id: id, onSuccess: onSuccess, onError: onError),
+  );
+
+  @override
+  void restore({
+    required String id,
+    required void Function() onSuccess,
+    required void Function(Object error) onError,
+  }) => _bloc.add(
+    AdminCustomersEvent.restored(
+      id: id,
       onSuccess: onSuccess,
       onError: onError,
     ),

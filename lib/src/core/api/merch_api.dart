@@ -178,12 +178,26 @@ class MerchApi {
     }
   }
 
-  Future<List<AdminCustomer>> searchCustomers(String query) async {
+  Future<List<AdminCustomer>> searchCustomers(
+    String query, {
+    String status = 'all',
+  }) async {
     final data = await _client.get(
       'admin/customers',
-      queryParams: {if (query.isNotEmpty) 'q': query},
+      queryParams: {
+        if (query.isNotEmpty) 'q': query,
+        if (status.isNotEmpty && status != 'all') 'status': status,
+      },
     );
     return asList(data?['customers']).map(_customerFromJson).toList();
+  }
+
+  Future<void> deleteCustomer(String id) async {
+    await _client.delete('admin/customers/$id');
+  }
+
+  Future<void> restoreCustomer(String id) async {
+    await _client.post('admin/customers/$id/restore', body: {});
   }
 
   Future<void> blockCustomer(String id) async {
@@ -209,6 +223,10 @@ class MerchApi {
   Future<List<StaffRow>> listStaff() async {
     final data = await _client.get('admin/staff');
     return asList(data?['staff']).map(_staffFromJson).toList();
+  }
+
+  Future<void> deleteStaff(String id) async {
+    await _client.delete('admin/staff/$id');
   }
 
   Future<StaffRow> createStaff({
@@ -279,10 +297,7 @@ class MerchApi {
   }) async {
     final data = await _client.patch(
       'admin/stores/$id',
-      body: {
-        'name': ?name,
-        'address': ?address,
-      },
+      body: {'name': ?name, 'address': ?address},
     );
     return _storeFromJson(data);
   }
@@ -322,6 +337,9 @@ class MerchApi {
           : asString(staff['login']),
       staffRole: asString(staff['role']),
       storeId: asString(staff['store_id']),
+      storeName: asString(staff['store_name']).isEmpty
+          ? null
+          : asString(staff['store_name']),
       expiresAt:
           DateTime.tryParse(asString(data['expires_at'])) ??
           DateTime.now().add(const Duration(hours: 12)),
@@ -354,6 +372,7 @@ class MerchApi {
       phone: asString(json['phone']),
       points: asInt(json['points']),
       blocked: asBool(json['blocked']),
+      deleted: asBool(json['deleted']),
     );
   }
 
@@ -362,6 +381,7 @@ class MerchApi {
     return StaffRow(
       id: asString(json['id']),
       storeId: asString(json['store_id']),
+      storeName: asString(json['store_name']),
       login: asString(json['login']),
       name: asString(json['name']),
       role: asString(json['role']),

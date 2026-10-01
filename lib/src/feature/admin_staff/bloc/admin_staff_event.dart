@@ -8,6 +8,7 @@ sealed class AdminStaffEvent {
     required String name,
     required String password,
     required String role,
+    required String storeId,
     required void Function() onSuccess,
     required void Function(Object error) onError,
   }) = AdminStaffEvent$Created;
@@ -18,10 +19,16 @@ sealed class AdminStaffEvent {
     required String name,
     required String password,
     required String role,
-    required bool active,
+    required String storeId,
     required void Function() onSuccess,
     required void Function(Object error) onError,
   }) = AdminStaffEvent$Updated;
+
+  const factory AdminStaffEvent.deleted({
+    required String id,
+    required void Function() onSuccess,
+    required void Function(Object error) onError,
+  }) = AdminStaffEvent$Deleted;
 }
 
 final class AdminStaffEvent$Started extends AdminStaffEvent {
@@ -34,6 +41,7 @@ final class AdminStaffEvent$Created extends AdminStaffEvent {
     required this.name,
     required this.password,
     required this.role,
+    required this.storeId,
     required this.onSuccess,
     required this.onError,
   });
@@ -42,6 +50,7 @@ final class AdminStaffEvent$Created extends AdminStaffEvent {
   final String name;
   final String password;
   final String role;
+  final String storeId;
   final void Function() onSuccess;
   final void Function(Object error) onError;
 }
@@ -53,7 +62,7 @@ final class AdminStaffEvent$Updated extends AdminStaffEvent {
     required this.name,
     required this.password,
     required this.role,
-    required this.active,
+    required this.storeId,
     required this.onSuccess,
     required this.onError,
   });
@@ -63,7 +72,19 @@ final class AdminStaffEvent$Updated extends AdminStaffEvent {
   final String name;
   final String password;
   final String role;
-  final bool active;
+  final String storeId;
+  final void Function() onSuccess;
+  final void Function(Object error) onError;
+}
+
+final class AdminStaffEvent$Deleted extends AdminStaffEvent {
+  const AdminStaffEvent$Deleted({
+    required this.id,
+    required this.onSuccess,
+    required this.onError,
+  });
+
+  final String id;
   final void Function() onSuccess;
   final void Function(Object error) onError;
 }

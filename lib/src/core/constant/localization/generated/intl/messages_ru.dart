@@ -71,6 +71,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "appTitle": MessageLookupByLibrary.simpleMessage("MERCH Касса"),
     "appVersion": m1,
     "back": MessageLookupByLibrary.simpleMessage("Назад"),
+    "barcodeCopied": MessageLookupByLibrary.simpleMessage(
+      "Штрихкод скопирован",
+    ),
     "barcodeOrUuidHint": MessageLookupByLibrary.simpleMessage("MCH-… или UUID"),
     "block": MessageLookupByLibrary.simpleMessage("Заблокировать"),
     "blocked": MessageLookupByLibrary.simpleMessage("блок"),
@@ -79,14 +82,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancel": MessageLookupByLibrary.simpleMessage("Отмена"),
     "card": MessageLookupByLibrary.simpleMessage("Карта"),
     "cardAlreadyExists": MessageLookupByLibrary.simpleMessage("Карта уже есть"),
+    "cardDeleted": MessageLookupByLibrary.simpleMessage("Удалена"),
     "cardNotFound": MessageLookupByLibrary.simpleMessage("Карта не найдена"),
+    "cardReady": MessageLookupByLibrary.simpleMessage("Карта готова"),
     "changePoints": MessageLookupByLibrary.simpleMessage("Изменить баллы"),
     "close": MessageLookupByLibrary.simpleMessage("Закрыть"),
-    "closeShift": MessageLookupByLibrary.simpleMessage("Закрыть смену"),
+    "closeShift": MessageLookupByLibrary.simpleMessage("Выйти"),
     "commitReceipt": MessageLookupByLibrary.simpleMessage("Провести чек"),
     "confirm": MessageLookupByLibrary.simpleMessage("Подтвердить"),
+    "copyBarcode": MessageLookupByLibrary.simpleMessage("Скопировать штрихкод"),
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "customer": MessageLookupByLibrary.simpleMessage("Клиент"),
+    "customerFilterActive": MessageLookupByLibrary.simpleMessage("Активные"),
+    "customerFilterAll": MessageLookupByLibrary.simpleMessage("Все"),
+    "customerFilterBlocked": MessageLookupByLibrary.simpleMessage(
+      "Заблокированные",
+    ),
+    "customerFilterDeleted": MessageLookupByLibrary.simpleMessage("Удалённые"),
     "customerSearchHint": MessageLookupByLibrary.simpleMessage(
       "Barcode, телефон, имя",
     ),
@@ -96,6 +108,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Попробуй barcode или телефон",
     ),
     "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
+    "deleteCardBody": MessageLookupByLibrary.simpleMessage(
+      "Карта скроется с кассы. Чеки и баллы останутся, её можно найти в фильтре «Удалённые».",
+    ),
+    "deleteCardTitle": MessageLookupByLibrary.simpleMessage("Удалить карту?"),
+    "deleteStaffBody": MessageLookupByLibrary.simpleMessage(
+      "Он больше не сможет войти. Чеки останутся.",
+    ),
+    "deleteStaffTitle": MessageLookupByLibrary.simpleMessage(
+      "Удалить сотрудника?",
+    ),
     "deleteStoreTitle": MessageLookupByLibrary.simpleMessage("Удалить точку?"),
     "deltaHint": MessageLookupByLibrary.simpleMessage("Дельта, можно минус"),
     "done": MessageLookupByLibrary.simpleMessage("Готово"),
@@ -116,6 +138,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "genericError": MessageLookupByLibrary.simpleMessage(
       "Что-то пошло не так. Попробуй ещё раз.",
     ),
+    "goToPurchase": MessageLookupByLibrary.simpleMessage("К покупке"),
     "goToReceipt": MessageLookupByLibrary.simpleMessage("Сразу к чеку"),
     "gotIt": MessageLookupByLibrary.simpleMessage("Понятно"),
     "guest": MessageLookupByLibrary.simpleMessage("Гость"),
@@ -183,12 +206,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сервер сторнирует начисление и вернёт списанные баллы.",
     ),
     "refundReceiptTitle": MessageLookupByLibrary.simpleMessage("Вернуть чек?"),
+    "restoreCard": MessageLookupByLibrary.simpleMessage("Восстановить"),
     "retry": MessageLookupByLibrary.simpleMessage("Повторить"),
     "role": MessageLookupByLibrary.simpleMessage("Роль"),
     "roleAdmin": MessageLookupByLibrary.simpleMessage("Админ"),
     "roleCashier": MessageLookupByLibrary.simpleMessage("Кассир"),
     "roleShiftLead": MessageLookupByLibrary.simpleMessage("Старший смены"),
     "save": MessageLookupByLibrary.simpleMessage("Сохранить"),
+    "saveCardHint": MessageLookupByLibrary.simpleMessage(
+      "Клиент сканирует QR и сохраняет карту в Wallet",
+    ),
     "scanHint": MessageLookupByLibrary.simpleMessage(
       "Наведи на QR карты MERCH",
     ),
@@ -219,11 +246,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Покажи QR клиенту",
     ),
     "signIn": MessageLookupByLibrary.simpleMessage("Войти"),
+    "signOut": MessageLookupByLibrary.simpleMessage("Выйти"),
     "staff": MessageLookupByLibrary.simpleMessage("Сотрудники"),
     "staffActive": MessageLookupByLibrary.simpleMessage("Активен"),
     "staffEmpty": MessageLookupByLibrary.simpleMessage("Нет сотрудников"),
     "staffEmptyHint": MessageLookupByLibrary.simpleMessage(
-      "Добавь кассира, старшего смены или админа",
+      "Добавь кассира или админа",
     ),
     "staffMember": MessageLookupByLibrary.simpleMessage("Сотрудник"),
     "statusCommitted": MessageLookupByLibrary.simpleMessage("проведён"),
@@ -234,6 +262,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "storeNameRequired": MessageLookupByLibrary.simpleMessage(
       "Название обязательно",
     ),
+    "storeRequired": MessageLookupByLibrary.simpleMessage("Выбери точку"),
     "stores": MessageLookupByLibrary.simpleMessage("Точки"),
     "storesEmpty": MessageLookupByLibrary.simpleMessage("Нет точек"),
     "storesEmptyHint": MessageLookupByLibrary.simpleMessage(

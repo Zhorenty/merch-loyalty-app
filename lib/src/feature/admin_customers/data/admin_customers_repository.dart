@@ -2,11 +2,15 @@ import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/feature/admin_customers/data/admin_customers_data_source.dart';
 
 abstract interface class AdminCustomersRepository {
-  Future<List<AdminCustomer>> search(String query);
+  Future<List<AdminCustomer>> search(String query, {String status = 'all'});
 
   Future<void> block(String id);
 
   Future<void> unblock(String id);
+
+  Future<void> delete(String id);
+
+  Future<void> restore(String id);
 
   Future<int> adjust({
     required String barcode,
@@ -22,13 +26,20 @@ final class AdminCustomersRepositoryImpl implements AdminCustomersRepository {
   final AdminCustomersDataSource _dataSource;
 
   @override
-  Future<List<AdminCustomer>> search(String query) => _dataSource.search(query);
+  Future<List<AdminCustomer>> search(String query, {String status = 'all'}) =>
+      _dataSource.search(query, status: status);
 
   @override
   Future<void> block(String id) => _dataSource.block(id);
 
   @override
   Future<void> unblock(String id) => _dataSource.unblock(id);
+
+  @override
+  Future<void> delete(String id) => _dataSource.delete(id);
+
+  @override
+  Future<void> restore(String id) => _dataSource.restore(id);
 
   @override
   Future<int> adjust({

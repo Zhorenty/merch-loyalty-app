@@ -9,6 +9,7 @@ abstract interface class AdminStaffRepository {
     required String name,
     required String password,
     required String role,
+    required String storeId,
   });
 
   Future<StaffRow> patch(
@@ -17,8 +18,10 @@ abstract interface class AdminStaffRepository {
     String? name,
     String? password,
     String? role,
-    bool? active,
+    String? storeId,
   });
+
+  Future<void> delete(String id);
 }
 
 final class AdminStaffRepositoryImpl implements AdminStaffRepository {
@@ -36,11 +39,13 @@ final class AdminStaffRepositoryImpl implements AdminStaffRepository {
     required String name,
     required String password,
     required String role,
+    required String storeId,
   }) => _dataSource.create(
     login: login,
     name: name,
     password: password,
     role: role,
+    storeId: storeId,
   );
 
   @override
@@ -50,13 +55,16 @@ final class AdminStaffRepositoryImpl implements AdminStaffRepository {
     String? name,
     String? password,
     String? role,
-    bool? active,
+    String? storeId,
   }) => _dataSource.patch(
     id,
     login: login,
     name: name,
     password: password,
     role: role,
-    active: active,
+    storeId: storeId,
   );
+
+  @override
+  Future<void> delete(String id) => _dataSource.delete(id);
 }

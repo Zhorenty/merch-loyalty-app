@@ -1,8 +1,10 @@
 sealed class AdminCustomersEvent {
   const AdminCustomersEvent();
 
-  const factory AdminCustomersEvent.searched(String query) =
-      AdminCustomersEvent$Searched;
+  const factory AdminCustomersEvent.searched(
+    String query, {
+    required String status,
+  }) = AdminCustomersEvent$Searched;
 
   const factory AdminCustomersEvent.blocked({
     required String id,
@@ -18,12 +20,25 @@ sealed class AdminCustomersEvent {
     required void Function(int points) onSuccess,
     required void Function(Object error) onError,
   }) = AdminCustomersEvent$Adjusted;
+
+  const factory AdminCustomersEvent.deleted({
+    required String id,
+    required void Function() onSuccess,
+    required void Function(Object error) onError,
+  }) = AdminCustomersEvent$Deleted;
+
+  const factory AdminCustomersEvent.restored({
+    required String id,
+    required void Function() onSuccess,
+    required void Function(Object error) onError,
+  }) = AdminCustomersEvent$Restored;
 }
 
 final class AdminCustomersEvent$Searched extends AdminCustomersEvent {
-  const AdminCustomersEvent$Searched(this.query);
+  const AdminCustomersEvent$Searched(this.query, {required this.status});
 
   final String query;
+  final String status;
 }
 
 final class AdminCustomersEvent$Blocked extends AdminCustomersEvent {
@@ -53,5 +68,29 @@ final class AdminCustomersEvent$Adjusted extends AdminCustomersEvent {
   final int delta;
   final String reason;
   final void Function(int points) onSuccess;
+  final void Function(Object error) onError;
+}
+
+final class AdminCustomersEvent$Deleted extends AdminCustomersEvent {
+  const AdminCustomersEvent$Deleted({
+    required this.id,
+    required this.onSuccess,
+    required this.onError,
+  });
+
+  final String id;
+  final void Function() onSuccess;
+  final void Function(Object error) onError;
+}
+
+final class AdminCustomersEvent$Restored extends AdminCustomersEvent {
+  const AdminCustomersEvent$Restored({
+    required this.id,
+    required this.onSuccess,
+    required this.onError,
+  });
+
+  final String id;
+  final void Function() onSuccess;
   final void Function(Object error) onError;
 }

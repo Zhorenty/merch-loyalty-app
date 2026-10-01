@@ -1,10 +1,9 @@
 enum AppRole { manager, admin }
 
 const staffRoleCashier = 'cashier';
-const staffRoleShiftLead = 'shift_lead';
 const staffRoleAdmin = 'admin';
 
-const staffRoles = {staffRoleCashier, staffRoleShiftLead, staffRoleAdmin};
+const staffRoles = {staffRoleCashier, staffRoleAdmin};
 
 AppRole mapStaffRole(String role) {
   switch (role) {
@@ -16,12 +15,11 @@ AppRole mapStaffRole(String role) {
 }
 
 bool canRefundRole(String role) =>
-    role == staffRoleShiftLead || role == staffRoleAdmin;
+    role == staffRoleCashier || role == staffRoleAdmin || role == 'shift_lead';
 
 String staffRoleLabel(String role) => switch (role) {
   staffRoleAdmin => 'Админ',
-  staffRoleShiftLead => 'Старший смены',
-  staffRoleCashier => 'Кассир',
+  staffRoleCashier || 'shift_lead' => 'Кассир',
   _ => role,
 };
 
@@ -211,6 +209,7 @@ class AdminCustomer {
     required this.phone,
     required this.points,
     required this.blocked,
+    this.deleted = false,
   });
 
   final String id;
@@ -219,6 +218,7 @@ class AdminCustomer {
   final String phone;
   final int points;
   final bool blocked;
+  final bool deleted;
 
   String get displayName => name.trim().isEmpty ? 'Гость' : name;
 }
@@ -231,10 +231,12 @@ class StaffRow {
     required this.name,
     required this.role,
     required this.active,
+    this.storeName = '',
   });
 
   final String id;
   final String storeId;
+  final String storeName;
   final String login;
   final String name;
   final String role;

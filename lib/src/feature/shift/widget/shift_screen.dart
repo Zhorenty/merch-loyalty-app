@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
+import 'package:merch/src/core/widget/app_dialog.dart';
+import 'package:merch/src/core/widget/app_sheet.dart';
 import 'package:merch/src/core/widget/states.dart';
 import 'package:merch/src/feature/auth/widget/auth_scope.dart';
 import 'package:merch/src/feature/shift/bloc/shift_state.dart';
@@ -25,13 +27,11 @@ class ShiftScreen extends StatelessWidget {
           message: context.errorMessage(error),
           onRetry: shift.refresh,
         ),
-        ShiftState$Idle(:final unavailable)
-            when unavailable =>
-          EmptyState(
-            icon: Icons.receipt_long_outlined,
-            title: l10n.shiftHistoryLater,
-            subtitle: l10n.shiftHistoryNotCached,
-          ),
+        ShiftState$Idle(:final unavailable) when unavailable => EmptyState(
+          icon: Icons.receipt_long_outlined,
+          title: l10n.shiftHistoryLater,
+          subtitle: l10n.shiftHistoryNotCached,
+        ),
         ShiftState$Idle(:final receipts)
             when receipts == null || receipts.isEmpty =>
           EmptyState(
@@ -72,9 +72,8 @@ class _ReceiptTile extends StatelessWidget {
           l10n.receiptSubtitle(time, row.redeemPoints, row.earnPoints),
         ),
         trailing: _StatusChip(refunded: row.isRefunded),
-        onTap: () => showModalBottomSheet<void>(
+        onTap: () => showAppSheet<void>(
           context: context,
-          isScrollControlled: true,
           builder: (context) => ReceiptDetailSheet(row: row),
         ),
       ),
@@ -171,22 +170,12 @@ class _ReceiptDetailSheetState extends State<ReceiptDetailSheet> {
 
   Future<void> _refund() async {
     final l10n = context.l10n;
-    final ok = await showDialog<bool>(
+    final ok = await showConfirmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.refundReceiptTitle),
-        content: Text(l10n.refundReceiptBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.refund),
-          ),
-        ],
-      ),
+      title: l10n.refundReceiptTitle,
+      message: l10n.refundReceiptBody,
+      confirmLabel: l10n.refund,
+      cancelLabel: l10n.cancel,
     );
     if (ok != true || !mounted) return;
     setState(() {
