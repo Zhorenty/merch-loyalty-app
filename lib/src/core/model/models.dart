@@ -257,6 +257,24 @@ class StoreLocation {
   final String address;
 }
 
+class ActivityEntry {
+  const ActivityEntry({
+    required this.id,
+    required this.createdAt,
+    required this.actorName,
+    required this.kind,
+    required this.title,
+    required this.detail,
+  });
+
+  final String id;
+  final DateTime createdAt;
+  final String actorName;
+  final String kind;
+  final String title;
+  final String detail;
+}
+
 class AppVersionInfo {
   const AppVersionInfo({required this.minSupported, required this.downloadUrl});
 

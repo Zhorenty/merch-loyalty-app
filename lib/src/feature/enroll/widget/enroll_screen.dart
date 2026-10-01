@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
+import 'package:merch/src/core/utils/phone.dart';
 import 'package:merch/src/feature/enroll/widget/enroll_scope.dart';
 import 'package:merch/src/feature/initialization/widget/dependencies_scope.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -43,12 +44,13 @@ class _EnrollScreenState extends State<EnrollScreen> {
             TextField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(hintText: l10n.nameOptional),
+              decoration: InputDecoration(hintText: l10n.nameHint),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
+              inputFormatters: const [RuPhoneInputFormatter()],
               decoration: InputDecoration(hintText: l10n.phoneOptional),
             ),
             const SizedBox(height: 8),
@@ -163,15 +165,25 @@ class _EnrollScreenState extends State<EnrollScreen> {
   }
 
   void _submit() {
-    final phone = _phoneController.text.trim();
-    if (phone.isNotEmpty && !_consent) {
-      setState(() => _error = context.l10n.phoneConsentRequired);
+    final l10n = context.l10n;
+    final name = _nameController.text.trim();
+    final phone = normalizedRuPhone(_phoneController.text);
+    if (name.isEmpty) {
+      setState(() => _error = l10n.nameRequired);
+      return;
+    }
+    if (phone == null) {
+      setState(() => _error = l10n.phoneInvalid);
+      return;
+    }
+    if (!_consent) {
+      setState(() => _error = l10n.phoneConsentRequired);
       return;
     }
     setState(() => _error = null);
     EnrollScope.of(context).submit(
-      name: _nameController.text.trim(),
-      phone: phone.isEmpty || !_consent ? null : phone,
+      name: name,
+      phone: phone,
       onSuccess: (result) {
         if (!mounted) return;
         if (!result.created) {

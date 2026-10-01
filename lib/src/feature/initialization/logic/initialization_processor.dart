@@ -20,6 +20,7 @@ import 'package:merch/src/feature/auth/data/session_storage.dart';
 import 'package:merch/src/feature/auth/logic/auth_interceptor.dart';
 import 'package:merch/src/feature/enroll/data/enroll_data_source.dart';
 import 'package:merch/src/feature/enroll/data/enroll_repository.dart';
+import 'package:merch/src/feature/profile/data/activity_repository.dart';
 import 'package:merch/src/feature/receipt/data/receipt_data_source.dart';
 import 'package:merch/src/feature/receipt/data/receipt_repository.dart';
 import 'package:merch/src/feature/scan/data/scan_data_source.dart';
@@ -129,6 +130,7 @@ final class InitializationProcessor {
       adminStoresRepository: AdminStoresRepositoryImpl(
         dataSource: AdminStoresDataSourceNetwork(api: api),
       ),
+      activityRepository: ActivityRepositoryImpl(api: api),
       appVersion: version,
       currentVersion: currentVersion,
     );

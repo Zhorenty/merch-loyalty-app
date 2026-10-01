@@ -2,7 +2,7 @@ import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/feature/admin_customers/data/admin_customers_data_source.dart';
 
 abstract interface class AdminCustomersRepository {
-  Future<List<AdminCustomer>> search(String query, {String status = 'all'});
+  Future<List<AdminCustomer>> search(String query, {String status = 'active'});
 
   Future<void> block(String id);
 
@@ -26,7 +26,7 @@ final class AdminCustomersRepositoryImpl implements AdminCustomersRepository {
   final AdminCustomersDataSource _dataSource;
 
   @override
-  Future<List<AdminCustomer>> search(String query, {String status = 'all'}) =>
+  Future<List<AdminCustomer>> search(String query, {String status = 'active'}) =>
       _dataSource.search(query, status: status);
 
   @override

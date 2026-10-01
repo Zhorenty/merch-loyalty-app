@@ -57,6 +57,10 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "active": MessageLookupByLibrary.simpleMessage("активен"),
+    "activityEmpty": MessageLookupByLibrary.simpleMessage("Пока нет действий"),
+    "activityEmptyHint": MessageLookupByLibrary.simpleMessage(
+      "Здесь появятся карты, чеки, сотрудники и точки",
+    ),
     "addressHint": MessageLookupByLibrary.simpleMessage("Адрес"),
     "addressMissing": MessageLookupByLibrary.simpleMessage("Адрес не указан"),
     "adjustDeltaRequired": MessageLookupByLibrary.simpleMessage(
@@ -159,6 +163,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("Ещё"),
     "nameHint": MessageLookupByLibrary.simpleMessage("Имя"),
     "nameOptional": MessageLookupByLibrary.simpleMessage("Имя (необязательно)"),
+    "nameRequired": MessageLookupByLibrary.simpleMessage("Укажите имя"),
     "newPasswordOptional": MessageLookupByLibrary.simpleMessage(
       "Новый пароль (необязательно)",
     ),
@@ -185,9 +190,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "phoneConsentRequired": MessageLookupByLibrary.simpleMessage(
       "Нужно согласие, чтобы сохранить телефон",
     ),
-    "phoneOptional": MessageLookupByLibrary.simpleMessage(
-      "Телефон (необязательно)",
+    "phoneInvalid": MessageLookupByLibrary.simpleMessage(
+      "Введите телефон полностью: +7 и 10 цифр",
     ),
+    "phoneOptional": MessageLookupByLibrary.simpleMessage("+7 (900) 000-00-00"),
     "points": MessageLookupByLibrary.simpleMessage("баллов"),
     "pointsAfter": m7,
     "pointsOnCard": MessageLookupByLibrary.simpleMessage("баллов на карте"),
@@ -195,6 +201,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "reasonHint": MessageLookupByLibrary.simpleMessage("Причина"),
     "receipt": MessageLookupByLibrary.simpleMessage("Чек"),
     "receiptSubtitle": m8,
+    "recentActivity": MessageLookupByLibrary.simpleMessage(
+      "Последние действия",
+    ),
     "redeemBelowMin": m9,
     "redeemFrom": m10,
     "redeemLine": m11,

@@ -6,6 +6,7 @@ import 'package:merch/src/feature/admin_staff/data/admin_staff_repository.dart';
 import 'package:merch/src/feature/admin_stores/data/admin_stores_repository.dart';
 import 'package:merch/src/feature/auth/bloc/auth_bloc.dart';
 import 'package:merch/src/feature/enroll/data/enroll_repository.dart';
+import 'package:merch/src/feature/profile/data/activity_repository.dart';
 import 'package:merch/src/feature/receipt/data/receipt_repository.dart';
 import 'package:merch/src/feature/scan/data/scan_repository.dart';
 import 'package:merch/src/feature/shift/data/shift_repository.dart';
@@ -22,6 +23,7 @@ base class Dependencies {
     required this.adminCustomersRepository,
     required this.adminStaffRepository,
     required this.adminStoresRepository,
+    required this.activityRepository,
     this.appVersion,
     this.currentVersion = '1.0.0',
   });
@@ -36,6 +38,7 @@ base class Dependencies {
   final AdminCustomersRepository adminCustomersRepository;
   final AdminStaffRepository adminStaffRepository;
   final AdminStoresRepository adminStoresRepository;
+  final ActivityRepository activityRepository;
   final AppVersionInfo? appVersion;
   final String currentVersion;
 }

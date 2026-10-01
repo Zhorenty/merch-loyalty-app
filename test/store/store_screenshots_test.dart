@@ -17,6 +17,7 @@ import 'package:merch/src/feature/admin_stores/data/admin_stores_repository.dart
 import 'package:merch/src/feature/auth/widget/auth_scope.dart';
 import 'package:merch/src/feature/customer/widget/customer_card_screen.dart';
 import 'package:merch/src/feature/enroll/data/enroll_repository.dart';
+import 'package:merch/src/feature/profile/data/activity_repository.dart';
 import 'package:merch/src/feature/shift/data/shift_repository.dart';
 import 'package:merch/src/feature/enroll/widget/enroll_scope.dart';
 import 'package:merch/src/feature/enroll/widget/enroll_screen.dart';
@@ -234,6 +235,7 @@ Dependencies _dependencies() => Dependencies(
   adminCustomersRepository: _CustomersRepository(),
   adminStaffRepository: _StaffRepository(),
   adminStoresRepository: _StoresRepository(),
+  activityRepository: _ActivityRepository(),
 );
 
 Future<void> _loadRoboto() async {
@@ -653,7 +655,7 @@ final class _CustomersRepository implements AdminCustomersRepository {
   @override
   Future<List<AdminCustomer>> search(
     String query, {
-    String status = 'all',
+    String status = 'active',
   }) async => const [];
 
   @override
@@ -701,4 +703,9 @@ final class _StoresRepository implements AdminStoresRepository {
   @override
   Future<StoreLocation> patch(String id, {String? name, String? address}) =>
       throw UnimplementedError();
+}
+
+final class _ActivityRepository implements ActivityRepository {
+  @override
+  Future<List<ActivityEntry>> list({required bool admin}) async => const [];
 }

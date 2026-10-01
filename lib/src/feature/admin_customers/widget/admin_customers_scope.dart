@@ -9,7 +9,7 @@ import 'package:merch/src/feature/initialization/widget/dependencies_scope.dart'
 abstract interface class AdminCustomersController {
   AdminCustomersState get state;
 
-  void search(String query, {String status = 'all'});
+  void search(String query, {String status = 'active'});
 
   void setBlocked({
     required String id,
@@ -69,7 +69,7 @@ class _AdminCustomersScopeState extends State<AdminCustomersScope>
       repository: DependenciesScope.of(context).adminCustomersRepository,
     );
     if (widget.autoload) {
-      _bloc.add(const AdminCustomersEvent.searched('', status: 'all'));
+      _bloc.add(const AdminCustomersEvent.searched('', status: 'active'));
     }
   }
 
@@ -83,7 +83,7 @@ class _AdminCustomersScopeState extends State<AdminCustomersScope>
   AdminCustomersState get state => _bloc.state;
 
   @override
-  void search(String query, {String status = 'all'}) =>
+  void search(String query, {String status = 'active'}) =>
       _bloc.add(AdminCustomersEvent.searched(query, status: status));
 
   @override

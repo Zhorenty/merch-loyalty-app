@@ -2,7 +2,7 @@ import 'package:merch/src/core/api/merch_api.dart';
 import 'package:merch/src/core/model/models.dart';
 
 abstract interface class AdminCustomersDataSource {
-  Future<List<AdminCustomer>> search(String query, {String status = 'all'});
+  Future<List<AdminCustomer>> search(String query, {String status = 'active'});
 
   Future<void> block(String id);
 
@@ -26,7 +26,7 @@ final class AdminCustomersDataSourceNetwork
   final MerchApi _api;
 
   @override
-  Future<List<AdminCustomer>> search(String query, {String status = 'all'}) =>
+  Future<List<AdminCustomer>> search(String query, {String status = 'active'}) =>
       _api.searchCustomers(query, status: status);
 
   @override

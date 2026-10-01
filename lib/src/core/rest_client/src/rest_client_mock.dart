@@ -23,6 +23,8 @@ final class RestClientMock implements RestClient {
   final List<Map<String, Object?>> _receipts = [];
   final List<Map<String, Object?>> _staff = [];
   final List<Map<String, Object?>> _stores = [];
+  final List<Map<String, Object?>> _activity = [];
+  String _actorName = 'Иван Кассиров';
   final Map<String, String> _loyaltySettings = {
     'earn_percent': '5',
     'earn_round': 'down',
@@ -84,7 +86,41 @@ final class RestClientMock implements RestClient {
       phone: '+79990002233',
       points: 60,
     );
+    final now = DateTime.now().toUtc();
+    _activity.addAll([
+      {
+        'id': 'act-2',
+        'created_at': now.subtract(const Duration(hours: 1)).toIso8601String(),
+        'actor_name': 'Иван Кассиров',
+        'kind': 'receipt_committed',
+        'title': 'Чек: списание и начисление',
+        'detail': '4500 ₽ · списано 200 · начислено 215 · 1234567890123',
+      },
+      {
+        'id': 'act-1',
+        'created_at': now.subtract(const Duration(hours: 2)).toIso8601String(),
+        'actor_name': 'Иван Кассиров',
+        'kind': 'card_issued',
+        'title': 'Выдана карта',
+        'detail': 'Мария Смирнова · +79990001122',
+      },
+    ]);
   }
+
+  void _record(String kind, String title, String detail) {
+    _activity.insert(0, {
+      'id': 'act-${_activity.length + 1}',
+      'created_at': DateTime.now().toUtc().toIso8601String(),
+      'actor_name': _actorName,
+      'kind': kind,
+      'title': title,
+      'detail': detail,
+    });
+  }
+
+  Map<String, Object?> _listActivity() => {
+    'activity': _activity.take(80).toList(),
+  };
 
   void _seedCustomer({
     required String barcode,
@@ -167,6 +203,10 @@ final class RestClientMock implements RestClient {
     if (_is(segments, ['cashier', 'refund'])) return _refund(b);
     if (_is(segments, ['cashier', 'enroll'])) return _enroll(b);
     if (_is(segments, ['cashier', 'receipts'])) return _listReceipts(q);
+    if (_is(segments, ['cashier', 'activity']) ||
+        _is(segments, ['admin', 'activity'])) {
+      return _listActivity();
+    }
     if (_is(segments, ['cashier', 'receipts', '*'])) {
       return _receiptById(segments[2]);
     }
@@ -243,6 +283,7 @@ final class RestClientMock implements RestClient {
       );
     }
     _cashierRole = staff['role'] as String? ?? staffRoleCashier;
+    _actorName = staff['name'] as String? ?? _actorName;
 
     return {
       'token': 'mock-cashier-token-${DateTime.now().millisecondsSinceEpoch}',
@@ -423,6 +464,18 @@ final class RestClientMock implements RestClient {
       'store_id': storeId,
     };
     _receipts.insert(0, receipt);
+    final title = redeemPoints > 0 && earnPoints > 0
+        ? 'Чек: списание и начисление'
+        : redeemPoints > 0
+        ? 'Списание баллов'
+        : earnPoints > 0
+        ? 'Начисление баллов'
+        : 'Чек';
+    _record(
+      'receipt_committed',
+      title,
+      '$amountRub ₽ · списано $redeemPoints · начислено $earnPoints · $barcode',
+    );
 
     return {
       'receipt_id': receipt['receipt_id'],
@@ -467,6 +520,7 @@ final class RestClientMock implements RestClient {
       customer['points'] = points;
       receipt['status'] = 'refunded';
       receipt['points_after'] = points;
+      _record('receipt_refunded', 'Возврат чека', receiptId);
     }
     return {
       'receipt_id': receiptId,
@@ -477,15 +531,18 @@ final class RestClientMock implements RestClient {
   }
 
   Map<String, Object?> _enroll(Map<String, Object?> body) {
-    final name = body['name'] as String?;
-    final phone = body['phone'] as String?;
+    final name = (body['name'] as String? ?? '').trim();
+    final phone = (body['phone'] as String? ?? '').trim();
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (name.isEmpty || digits.length != 11 || !digits.startsWith('7')) {
+      throw const StructuredBackendException(
+        error: {'code': 'INVALID_REQUEST', 'message': 'Укажите имя и телефон'},
+        statusCode: 422,
+      );
+    }
     final barcode = _generateBarcode();
-    _seedCustomer(
-      barcode: barcode,
-      name: name ?? '',
-      phone: phone ?? '',
-      points: 0,
-    );
+    _seedCustomer(barcode: barcode, name: name, phone: phone, points: 0);
+    _record('card_issued', 'Выдана карта', '$name · $phone');
     final customer = _customersByBarcode[barcode]!;
     final id = customer['id'] as String;
     return {
@@ -554,7 +611,14 @@ final class RestClientMock implements RestClient {
         statusCode: 404,
       );
     }
-    customer['deleted'] = deleted;
+    if (customer['deleted'] != deleted) {
+      customer['deleted'] = deleted;
+      _record(
+        deleted ? 'customer_deleted' : 'customer_restored',
+        deleted ? 'Карта удалена' : 'Карта восстановлена',
+        '${customer['name']} · ${customer['phone']}',
+      );
+    }
     return customer;
   }
 
@@ -569,7 +633,14 @@ final class RestClientMock implements RestClient {
         statusCode: 422,
       );
     }
-    if (customer.isNotEmpty) customer['blocked'] = blocked;
+    if (customer.isNotEmpty) {
+      customer['blocked'] = blocked;
+      _record(
+        blocked ? 'customer_blocked' : 'customer_unblocked',
+        blocked ? 'Карта заблокирована' : 'Карта разблокирована',
+        '${customer['name']} · ${customer['phone']}',
+      );
+    }
     return {'id': id, 'blocked': blocked};
   }
 
@@ -579,6 +650,11 @@ final class RestClientMock implements RestClient {
     final customer = _customerOrCreate(barcode);
     final points = ((customer['points'] as int) + delta).clamp(0, 1 << 30);
     customer['points'] = points;
+    _record(
+      'points_adjusted',
+      delta < 0 ? 'Списание баллов' : 'Начисление баллов',
+      '$delta · ${customer['name']} · ${body['reason'] ?? ''}',
+    );
     return {
       'customer_id': customer['id'],
       'barcode': customer['barcode'],
@@ -617,6 +693,7 @@ final class RestClientMock implements RestClient {
       'active': body['active'] as bool? ?? true,
     };
     _staff.add(staff);
+    _record('staff_created', 'Добавлен сотрудник', name);
     return _staffOut(staff);
   }
 
@@ -638,6 +715,11 @@ final class RestClientMock implements RestClient {
           ? (body[key] as String? ?? '').trim().toLowerCase()
           : body[key];
     }
+    _record(
+      'staff_updated',
+      'Изменён сотрудник',
+      staff['name'] as String? ?? '',
+    );
     return _staffOut(staff);
   }
 
@@ -653,6 +735,11 @@ final class RestClientMock implements RestClient {
       );
     }
     staff['deleted'] = true;
+    _record(
+      'staff_deleted',
+      'Удалён сотрудник',
+      staff['name'] as String? ?? '',
+    );
     return null;
   }
 
@@ -684,6 +771,7 @@ final class RestClientMock implements RestClient {
       address: body['address'] as String? ?? '',
     );
     _stores.add(store);
+    _record('store_created', 'Добавлена точка', name);
     return store;
   }
 
@@ -702,10 +790,12 @@ final class RestClientMock implements RestClient {
     final address = body['address'] as String? ?? '';
     if (name.isNotEmpty) store['Name'] = name;
     if (address.isNotEmpty) store['Address'] = address;
+    _record('store_updated', 'Изменена точка', store['Name'] as String? ?? '');
     return store;
   }
 
   Map<String, Object?>? _deleteStore(String id) {
+    final name = _storeNameFor(id);
     final before = _stores.length;
     _stores.removeWhere((s) => s['ID'] == id);
     if (_stores.length == before) {
@@ -714,6 +804,7 @@ final class RestClientMock implements RestClient {
         statusCode: 404,
       );
     }
+    _record('store_deleted', 'Удалена точка', name.isEmpty ? id : name);
     return null;
   }
 
@@ -724,6 +815,7 @@ final class RestClientMock implements RestClient {
     for (final entry in body.entries) {
       _loyaltySettings[entry.key] = entry.value?.toString() ?? '';
     }
+    _record('settings_updated', 'Изменены правила лояльности', '');
     return Map<String, Object?>.from(_loyaltySettings);
   }
 

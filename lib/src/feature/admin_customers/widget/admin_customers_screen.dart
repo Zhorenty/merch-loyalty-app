@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
+import 'package:merch/src/core/utils/phone.dart';
 import 'package:merch/src/core/widget/app_dialog.dart';
 import 'package:merch/src/core/widget/states.dart';
 import 'package:merch/src/feature/admin_customers/bloc/admin_customers_state.dart';
@@ -22,7 +23,7 @@ class AdminCustomersScreen extends StatefulWidget {
 class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
   final _query = TextEditingController();
   Timer? _debounce;
-  String _status = 'all';
+  String _status = 'active';
 
   @override
   void dispose() {
@@ -376,7 +377,7 @@ class _AdminCustomerSheetState extends State<AdminCustomerSheet> {
             style: const TextStyle(fontFamily: 'monospace'),
           ),
           if (_customer.phone.isNotEmpty)
-            Text(_customer.phone, textAlign: TextAlign.center),
+            Text(formatRuPhone(_customer.phone), textAlign: TextAlign.center),
           const SizedBox(height: 24),
           if (_customer.deleted)
             ElevatedButton(

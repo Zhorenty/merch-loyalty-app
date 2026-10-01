@@ -180,7 +180,7 @@ class MerchApi {
 
   Future<List<AdminCustomer>> searchCustomers(
     String query, {
-    String status = 'all',
+    String status = 'active',
   }) async {
     final data = await _client.get(
       'admin/customers',
@@ -388,6 +388,28 @@ class MerchApi {
       active: asBool(json['active']),
     );
   }
+
+  Future<List<ActivityEntry>> listActivity({required bool admin}) async {
+    final data = await _client.get(
+      admin ? 'admin/activity' : 'cashier/activity',
+    );
+    final raw = data?['activity'];
+    if (raw is! List) return const [];
+    return [
+      for (final item in raw)
+        if (item is Map) _activityFromJson(item),
+    ];
+  }
+
+  ActivityEntry _activityFromJson(Map<dynamic, dynamic> json) => ActivityEntry(
+    id: asString(json['id']),
+    createdAt:
+        DateTime.tryParse(asString(json['created_at'])) ?? DateTime.now(),
+    actorName: asString(json['actor_name']),
+    kind: asString(json['kind']),
+    title: asString(json['title']),
+    detail: asString(json['detail']),
+  );
 
   StoreLocation _storeFromJson(Object? raw) {
     final json = asMap(raw);

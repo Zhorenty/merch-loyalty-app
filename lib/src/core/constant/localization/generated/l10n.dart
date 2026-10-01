@@ -379,11 +379,61 @@ class AppLocalizations {
     );
   }
 
-  /// `Телефон (необязательно)`
+  /// `Укажите имя`
+  String get nameRequired {
+    return Intl.message(
+      'Укажите имя',
+      name: 'nameRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Последние действия`
+  String get recentActivity {
+    return Intl.message(
+      'Последние действия',
+      name: 'recentActivity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Пока нет действий`
+  String get activityEmpty {
+    return Intl.message(
+      'Пока нет действий',
+      name: 'activityEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Здесь появятся карты, чеки, сотрудники и точки`
+  String get activityEmptyHint {
+    return Intl.message(
+      'Здесь появятся карты, чеки, сотрудники и точки',
+      name: 'activityEmptyHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `+7 (900) 000-00-00`
   String get phoneOptional {
     return Intl.message(
-      'Телефон (необязательно)',
+      '+7 (900) 000-00-00',
       name: 'phoneOptional',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Введите телефон полностью: +7 и 10 цифр`
+  String get phoneInvalid {
+    return Intl.message(
+      'Введите телефон полностью: +7 и 10 цифр',
+      name: 'phoneInvalid',
       desc: '',
       args: [],
     );

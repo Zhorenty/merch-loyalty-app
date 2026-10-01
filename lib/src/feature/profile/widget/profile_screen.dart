@@ -3,6 +3,7 @@ import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
 import 'package:merch/src/feature/auth/widget/auth_scope.dart';
 import 'package:merch/src/feature/initialization/widget/dependencies_scope.dart';
+import 'package:merch/src/feature/profile/widget/activity_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -71,6 +72,19 @@ class ProfileBody extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Card(
+          child: ListTile(
+            leading: Icon(Icons.history, color: context.colorScheme.primary),
+            title: Text(l10n.recentActivity),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const ActivityScreen()),
+              );
+            },
           ),
         ),
         const SizedBox(height: 16),
