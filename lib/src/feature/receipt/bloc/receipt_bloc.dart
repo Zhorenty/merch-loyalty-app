@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:merch/src/core/rest_client/rest_client.dart';
 import 'package:merch/src/core/utils/set_state_mixin.dart';
@@ -10,35 +11,41 @@ final class ReceiptBloc extends Bloc<ReceiptEvent, ReceiptState>
   ReceiptBloc({required ReceiptRepository receiptRepository})
     : _receiptRepository = receiptRepository,
       super(const ReceiptState.idle()) {
-    on<ReceiptEvent>(
-      (event, emit) => switch (event) {
-        final ReceiptEvent$Quote e => _quote(e, emit),
-        final ReceiptEvent$Commit e => _commit(e, emit),
-      },
-    );
+    on<ReceiptEvent$Quote>(_quote, transformer: restartable());
+    on<ReceiptEvent$Commit>(_commit);
   }
 
   final ReceiptRepository _receiptRepository;
+  var _quoteSerial = 0;
 
   Future<void> _quote(
     ReceiptEvent$Quote event,
     Emitter<ReceiptState> emit,
   ) async {
+    if (state.isCommitting) return;
+    final serial = ++_quoteSerial;
     if (event.amountRub <= 0) {
       emit(const ReceiptState.idle());
       return;
     }
-    emit(ReceiptState.quoting(quote: state.quote));
+    emit(ReceiptState.quoting(quote: state.quote, amountRub: state.amountRub));
     try {
       final quote = await _receiptRepository.quote(
         barcode: event.barcode,
         amountRub: event.amountRub,
         requestedPoints: event.requestedPoints,
       );
-      emit(ReceiptState.idle(quote: quote));
+      if (emit.isDone || serial != _quoteSerial || state.isCommitting) return;
+      emit(ReceiptState.idle(quote: quote, amountRub: event.amountRub));
     } on Object catch (e, stackTrace) {
+      if (emit.isDone || serial != _quoteSerial) return;
       emit(
-        ReceiptState.idle(error: e, offline: e is ConnectionException),
+        ReceiptState.idle(
+          quote: state.quote,
+          amountRub: state.amountRub,
+          error: e,
+          offline: e is ConnectionException,
+        ),
       );
       onError(e, stackTrace);
     }
@@ -48,7 +55,10 @@ final class ReceiptBloc extends Bloc<ReceiptEvent, ReceiptState>
     ReceiptEvent$Commit event,
     Emitter<ReceiptState> emit,
   ) async {
-    emit(ReceiptState.committing(quote: state.quote));
+    _quoteSerial++;
+    emit(
+      ReceiptState.committing(quote: state.quote, amountRub: state.amountRub),
+    );
     try {
       final result = await _receiptRepository.commit(
         receiptId: event.receiptId,
@@ -56,12 +66,13 @@ final class ReceiptBloc extends Bloc<ReceiptEvent, ReceiptState>
         amountRub: event.amountRub,
         redeemPoints: event.redeemPoints,
       );
-      emit(ReceiptState.idle(quote: state.quote));
+      emit(ReceiptState.idle(quote: state.quote, amountRub: state.amountRub));
       event.onSuccess(result);
     } on Object catch (e, stackTrace) {
       emit(
         ReceiptState.idle(
           quote: state.quote,
+          amountRub: state.amountRub,
           error: e,
           offline: e is ConnectionException,
         ),

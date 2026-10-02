@@ -33,12 +33,47 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    final status = err.response?.statusCode;
-    final path = err.requestOptions.uri.path;
-    if (status == 401 && !path.endsWith('/login')) {
+    if (_shouldSignOut(err)) {
       _onUnauthorized();
     }
     handler.next(err);
+  }
+
+  /// A single 401 used to wipe the shift. Sign out only when the server
+  /// rejected this session: the token is past [Session.expiresAt], or the
+  /// session was revoked / the staff account is inactive.
+  bool _shouldSignOut(DioException err) {
+    if (err.response?.statusCode != 401) return false;
+    final path = err.requestOptions.uri.path;
+    if (path.endsWith('/login') || path.endsWith('/logout')) return false;
+    final sent = err.requestOptions.headers['Authorization']?.toString() ?? '';
+    if (!sent.startsWith('Bearer ') ||
+        sent.trim().length <= 'Bearer '.length) {
+      return false;
+    }
+
+    final message = _errorMessage(err.response?.data).toLowerCase();
+    if (message.contains('отозван') ||
+        message.contains('неактив') ||
+        message.contains('удал')) {
+      return true;
+    }
+
+    final expiresAt = _session?.expiresAt;
+    if (expiresAt != null && expiresAt.isAfter(DateTime.now())) {
+      return false;
+    }
+    return true;
+  }
+
+  String _errorMessage(Object? data) {
+    if (data is Map) {
+      final error = data['error'];
+      if (error is Map && error['message'] is String) {
+        return error['message'] as String;
+      }
+    }
+    return '';
   }
 
   String? _tokenFor(String path) {

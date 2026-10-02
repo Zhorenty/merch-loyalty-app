@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
 import 'package:merch/src/core/utils/phone.dart';
+import 'package:merch/src/core/widget/copyable_text.dart';
 import 'package:merch/src/feature/enroll/widget/enroll_scope.dart';
 import 'package:merch/src/feature/initialization/widget/dependencies_scope.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -96,26 +96,35 @@ class _EnrollScreenState extends State<EnrollScreen> {
             ),
             const SizedBox(height: 24),
             Center(
-              child: QrImageView(
-                data: result.addPage.isNotEmpty
-                    ? result.addPage
-                    : result.barcode,
-                size: 240,
-                backgroundColor: Colors.white,
+              child: GestureDetector(
+                onTap: () => copyToClipboard(context, _qrValue(result)),
+                child: QrImageView(
+                  data: _qrValue(result),
+                  size: 240,
+                  backgroundColor: Colors.white,
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              result.barcode,
+            CopyableText(
+              text: _qrValue(result),
               textAlign: TextAlign.center,
-              style: context.textTheme.titleMedium?.copyWith(
+              style: context.textTheme.bodyMedium?.copyWith(
                 fontFamily: 'monospace',
               ),
             ),
+            if (result.barcode.isNotEmpty && result.barcode != _qrValue(result))
+              CopyableText(
+                text: result.barcode,
+                textAlign: TextAlign.center,
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontFamily: 'monospace',
+                ),
+              ),
             const SizedBox(height: 12),
             OutlinedButton(
-              onPressed: () => _copyBarcode(result.barcode),
-              child: Text(l10n.copyBarcode),
+              onPressed: () => copyToClipboard(context, _qrValue(result)),
+              child: Text(l10n.copyQr),
             ),
             const SizedBox(height: 12),
             ElevatedButton(
@@ -141,13 +150,8 @@ class _EnrollScreenState extends State<EnrollScreen> {
     );
   }
 
-  Future<void> _copyBarcode(String barcode) async {
-    await Clipboard.setData(ClipboardData(text: barcode));
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(context.l10n.barcodeCopied)));
-  }
+  String _qrValue(EnrollResult result) =>
+      result.addPage.isNotEmpty ? result.addPage : result.barcode;
 
   Future<void> _openSale(EnrollResult result) async {
     try {

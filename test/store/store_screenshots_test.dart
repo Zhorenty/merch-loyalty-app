@@ -37,6 +37,50 @@ import 'package:qr_flutter/qr_flutter.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  testWidgets('receipt recalculates as values change', (tester) async {
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    final deps = _dependencies();
+    addTearDown(deps.authBloc.close);
+
+    await tester.pumpWidget(
+      _app(deps, ReceiptScope(child: ReceiptScreen(customer: _customer))),
+    );
+    await tester.pump();
+
+    expect(find.text('Рассчитать'), findsNothing);
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), '2450');
+    await tester.pump();
+    expect(find.text('2450 ₽'), findsOneWidget);
+
+    await tester.enterText(fields.at(1), '300');
+    await tester.pump();
+    expect(find.text('2150 ₽'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    expect(find.text('108 б.'), findsOneWidget);
+    expect(find.text('2150 ₽'), findsOneWidget);
+
+    await tester.enterText(fields.at(0), '3000');
+    await tester.pump();
+    expect(find.text('2700 ₽'), findsOneWidget);
+  });
+
+  testWidgets('customer card offers next after scan', (tester) async {
+    final deps = _dependencies();
+    addTearDown(deps.authBloc.close);
+    await tester.pumpWidget(
+      _app(deps, const CustomerCardScreen(customer: _customer)),
+    );
+    await tester.pump();
+
+    expect(find.widgetWithText(ElevatedButton, 'Далее'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'Чек'), findsNothing);
+  });
+
   testWidgets('store screenshots', (tester) async {
     const enabled = bool.fromEnvironment('STORE_SHOTS');
     if (!enabled) return;
@@ -71,9 +115,8 @@ void main() {
           await tester.enterText(fields.at(0), '2450');
           await tester.enterText(fields.at(1), '300');
           await tester.pump();
-          await tester.tap(find.text('Рассчитать'));
+          await tester.pump(const Duration(milliseconds: 300));
           await tester.pump();
-          await tester.pump(const Duration(milliseconds: 50));
         },
       ),
       _Shot(

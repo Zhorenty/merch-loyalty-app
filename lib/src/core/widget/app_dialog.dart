@@ -149,29 +149,74 @@ Future<String?> showInputDialog({
   required String cancelLabel,
   TextCapitalization textCapitalization = TextCapitalization.none,
 }) {
-  final controller = TextEditingController();
   return showDialog<String>(
     context: context,
-    builder: (context) => AppDialog(
+    builder: (context) => _InputDialog(
       title: title,
+      hint: hint,
+      confirmLabel: confirmLabel,
+      cancelLabel: cancelLabel,
+      textCapitalization: textCapitalization,
+    ),
+  );
+}
+
+class _InputDialog extends StatefulWidget {
+  const _InputDialog({
+    required this.title,
+    required this.hint,
+    required this.confirmLabel,
+    required this.cancelLabel,
+    required this.textCapitalization,
+  });
+
+  final String title;
+  final String hint;
+  final String confirmLabel;
+  final String cancelLabel;
+  final TextCapitalization textCapitalization;
+
+  @override
+  State<_InputDialog> createState() => _InputDialogState();
+}
+
+class _InputDialogState extends State<_InputDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppDialog(
+      title: widget.title,
       content: TextField(
-        controller: controller,
+        controller: _controller,
         autofocus: true,
-        textCapitalization: textCapitalization,
-        decoration: InputDecoration(hintText: hint),
+        textCapitalization: widget.textCapitalization,
+        decoration: InputDecoration(hintText: widget.hint),
         onSubmitted: (value) => Navigator.pop(context, value),
       ),
       actions: [
         AppDialogAction(
-          label: confirmLabel,
+          label: widget.confirmLabel,
           primary: true,
-          onPressed: () => Navigator.pop(context, controller.text),
+          onPressed: () => Navigator.pop(context, _controller.text),
         ),
         AppDialogAction(
-          label: cancelLabel,
+          label: widget.cancelLabel,
           onPressed: () => Navigator.pop(context),
         ),
       ],
-    ),
-  ).whenComplete(controller.dispose);
+    );
+  }
 }

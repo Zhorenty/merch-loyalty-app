@@ -342,7 +342,7 @@ class MerchApi {
           : asString(staff['store_name']),
       expiresAt:
           DateTime.tryParse(asString(data['expires_at'])) ??
-          DateTime.now().add(const Duration(hours: 12)),
+          DateTime.now().add(const Duration(days: 30)),
     );
   }
 

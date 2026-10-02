@@ -28,6 +28,7 @@
     }
   },
   "receipt": "Чек",
+  "next": "Далее",
   "close": "Закрыть",
   "enterAmount": "Введи сумму чека",
   "redeemBelowMin": "Списать можно от {min} баллов",
@@ -65,6 +66,14 @@
   "amountHint": "Сумма чека, ₽",
   "calculate": "Рассчитать",
   "redeemPointsLabel": "Списать баллы",
+  "redeemNone": "Не списывать",
+  "redeemMax": "Максимум",
+  "availablePoints": "Доступно {points} б.",
+  "@availablePoints": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
   "redeemMinHint": "Минимум для списания — {min} б.",
   "@redeemMinHint": {
     "placeholders": {
@@ -216,6 +225,9 @@
   "saveCardHint": "Клиент сканирует QR и сохраняет карту в Wallet",
   "copyBarcode": "Скопировать штрихкод",
   "barcodeCopied": "Штрихкод скопирован",
+  "copy": "Скопировать",
+  "copied": "Скопировано",
+  "copyQr": "Скопировать QR",
   "goToPurchase": "К покупке",
   "updateApp": "Обнови приложение",
   "updateAppBody": "Минимальная версия {version}. Сканер закрыт, пока не поставишь новую сборку.",

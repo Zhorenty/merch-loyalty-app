@@ -7,6 +7,7 @@ import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
 import 'package:merch/src/core/utils/phone.dart';
 import 'package:merch/src/core/widget/app_dialog.dart';
+import 'package:merch/src/core/widget/copyable_text.dart';
 import 'package:merch/src/core/widget/states.dart';
 import 'package:merch/src/feature/admin_customers/bloc/admin_customers_state.dart';
 import 'package:merch/src/feature/admin_customers/widget/admin_customers_scope.dart';
@@ -371,13 +372,16 @@ class _AdminCustomerSheetState extends State<AdminCustomerSheet> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            _customer.barcode,
+          CopyableText(
+            text: _customer.barcode,
             textAlign: TextAlign.center,
             style: const TextStyle(fontFamily: 'monospace'),
           ),
           if (_customer.phone.isNotEmpty)
-            Text(formatRuPhone(_customer.phone), textAlign: TextAlign.center),
+            CopyableText(
+              text: formatRuPhone(_customer.phone),
+              textAlign: TextAlign.center,
+            ),
           const SizedBox(height: 24),
           if (_customer.deleted)
             ElevatedButton(

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:merch/src/core/constant/localization/localization.dart';
 import 'package:merch/src/core/model/models.dart';
 import 'package:merch/src/core/utils/extensions/context_extension.dart';
+import 'package:merch/src/core/widget/copyable_text.dart';
 
 class CustomerCardScreen extends StatelessWidget {
   const CustomerCardScreen({required this.customer, super.key});
@@ -28,8 +29,8 @@ class CustomerCardScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Text(
-              customer.barcode,
+            CopyableText(
+              text: customer.barcode,
               textAlign: TextAlign.center,
               style: context.textTheme.bodySmall?.copyWith(
                 fontFamily: 'monospace',
@@ -66,7 +67,7 @@ class CustomerCardScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () =>
                   context.push('/overlay/receipt', extra: customer),
-              child: Text(l10n.receipt),
+              child: Text(l10n.next),
             ),
             const SizedBox(height: 12),
             OutlinedButton(

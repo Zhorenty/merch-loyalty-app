@@ -288,7 +288,7 @@ final class RestClientMock implements RestClient {
     return {
       'token': 'mock-cashier-token-${DateTime.now().millisecondsSinceEpoch}',
       'expires_at': DateTime.now()
-          .add(const Duration(hours: 12))
+          .add(const Duration(days: 30))
           .toIso8601String(),
       'staff': {
         'id': staff['id'],

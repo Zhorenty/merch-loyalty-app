@@ -24,34 +24,36 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m1(version) => "Версия ${version}+1";
 
-  static String m2(min) => "Можно списать от ${min} баллов";
+  static String m2(points) => "Доступно ${points} б.";
 
-  static String m3(points) => "Начислим: ${points} б.";
+  static String m3(min) => "Можно списать от ${min} баллов";
 
-  static String m4(points) => "Начислено ${points} б.";
+  static String m4(points) => "Начислим: ${points} б.";
 
-  static String m5(points) => "На карте ${points} б.";
+  static String m5(points) => "Начислено ${points} б.";
 
-  static String m6(amount) => "К оплате: ${amount} ₽";
+  static String m6(points) => "На карте ${points} б.";
 
-  static String m7(points) => "Баланс после ${points} б.";
+  static String m7(amount) => "К оплате: ${amount} ₽";
 
-  static String m8(time, redeem, earn) =>
+  static String m8(points) => "Баланс после ${points} б.";
+
+  static String m9(time, redeem, earn) =>
       "${time} · списано ${redeem} · начислено ${earn}";
 
-  static String m9(min) => "Списать можно от ${min} баллов";
+  static String m10(min) => "Списать можно от ${min} баллов";
 
-  static String m10(min) => "Списание от ${min} баллов";
+  static String m11(min) => "Списание от ${min} баллов";
 
-  static String m11(points) => "Списать: ${points} б. = ${points} ₽";
+  static String m12(points) => "Списать: ${points} б. = ${points} ₽";
 
-  static String m12(min) => "Минимум для списания — ${min} б.";
+  static String m13(min) => "Минимум для списания — ${min} б.";
 
-  static String m13(points) => "Списано ${points} б.";
+  static String m14(points) => "Списано ${points} б.";
 
-  static String m14(id) => "Точка ${id}";
+  static String m15(id) => "Точка ${id}";
 
-  static String m15(version) =>
+  static String m16(version) =>
       "Минимальная версия ${version}. Сканер закрыт, пока не поставишь новую сборку.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -74,6 +76,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "anotherCard": MessageLookupByLibrary.simpleMessage("Ещё карту"),
     "appTitle": MessageLookupByLibrary.simpleMessage("MERCH Касса"),
     "appVersion": m1,
+    "availablePoints": m2,
     "back": MessageLookupByLibrary.simpleMessage("Назад"),
     "barcodeCopied": MessageLookupByLibrary.simpleMessage(
       "Штрихкод скопирован",
@@ -82,7 +85,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "block": MessageLookupByLibrary.simpleMessage("Заблокировать"),
     "blocked": MessageLookupByLibrary.simpleMessage("блок"),
     "calculate": MessageLookupByLibrary.simpleMessage("Рассчитать"),
-    "canRedeemFrom": m2,
+    "canRedeemFrom": m3,
     "cancel": MessageLookupByLibrary.simpleMessage("Отмена"),
     "card": MessageLookupByLibrary.simpleMessage("Карта"),
     "cardAlreadyExists": MessageLookupByLibrary.simpleMessage("Карта уже есть"),
@@ -94,7 +97,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "closeShift": MessageLookupByLibrary.simpleMessage("Выйти"),
     "commitReceipt": MessageLookupByLibrary.simpleMessage("Провести чек"),
     "confirm": MessageLookupByLibrary.simpleMessage("Подтвердить"),
+    "copied": MessageLookupByLibrary.simpleMessage("Скопировано"),
+    "copy": MessageLookupByLibrary.simpleMessage("Скопировать"),
     "copyBarcode": MessageLookupByLibrary.simpleMessage("Скопировать штрихкод"),
+    "copyQr": MessageLookupByLibrary.simpleMessage("Скопировать QR"),
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "customer": MessageLookupByLibrary.simpleMessage("Клиент"),
     "customerFilterActive": MessageLookupByLibrary.simpleMessage("Активные"),
@@ -126,8 +132,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "deltaHint": MessageLookupByLibrary.simpleMessage("Дельта, можно минус"),
     "done": MessageLookupByLibrary.simpleMessage("Готово"),
     "downloadApk": MessageLookupByLibrary.simpleMessage("Скачать APK"),
-    "earnLine": m3,
-    "earnedPoints": m4,
+    "earnLine": m4,
+    "earnedPoints": m5,
     "employee": MessageLookupByLibrary.simpleMessage("Сотрудник"),
     "emptyScanHint": MessageLookupByLibrary.simpleMessage(
       "Отсканируй карту на кассе",
@@ -169,6 +175,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "newStaff": MessageLookupByLibrary.simpleMessage("Новый сотрудник"),
     "newStore": MessageLookupByLibrary.simpleMessage("Новая точка"),
+    "next": MessageLookupByLibrary.simpleMessage("Далее"),
     "offlineBanner": MessageLookupByLibrary.simpleMessage(
       "Нет связи. Чек без сети провести нельзя.",
     ),
@@ -178,12 +185,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "offlineRetry": MessageLookupByLibrary.simpleMessage(
       "Нет связи. Проверь интернет и попробуй снова.",
     ),
-    "onCardPoints": m5,
+    "onCardPoints": m6,
     "passwordHint": MessageLookupByLibrary.simpleMessage("Пароль"),
     "passwordOrPinHint": MessageLookupByLibrary.simpleMessage("Пароль или PIN"),
     "passwordRequired": MessageLookupByLibrary.simpleMessage("Задай пароль"),
     "payable": MessageLookupByLibrary.simpleMessage("К оплате"),
-    "payableLine": m6,
+    "payableLine": m7,
     "phoneConsent": MessageLookupByLibrary.simpleMessage(
       "Клиент согласен на обработку телефона",
     ),
@@ -195,21 +202,23 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "phoneOptional": MessageLookupByLibrary.simpleMessage("+7 (900) 000-00-00"),
     "points": MessageLookupByLibrary.simpleMessage("баллов"),
-    "pointsAfter": m7,
+    "pointsAfter": m8,
     "pointsOnCard": MessageLookupByLibrary.simpleMessage("баллов на карте"),
     "profile": MessageLookupByLibrary.simpleMessage("Профиль"),
     "reasonHint": MessageLookupByLibrary.simpleMessage("Причина"),
     "receipt": MessageLookupByLibrary.simpleMessage("Чек"),
-    "receiptSubtitle": m8,
+    "receiptSubtitle": m9,
     "recentActivity": MessageLookupByLibrary.simpleMessage(
       "Последние действия",
     ),
-    "redeemBelowMin": m9,
-    "redeemFrom": m10,
-    "redeemLine": m11,
-    "redeemMinHint": m12,
+    "redeemBelowMin": m10,
+    "redeemFrom": m11,
+    "redeemLine": m12,
+    "redeemMax": MessageLookupByLibrary.simpleMessage("Максимум"),
+    "redeemMinHint": m13,
+    "redeemNone": MessageLookupByLibrary.simpleMessage("Не списывать"),
     "redeemPointsLabel": MessageLookupByLibrary.simpleMessage("Списать баллы"),
-    "redeemedPoints": m13,
+    "redeemedPoints": m14,
     "refund": MessageLookupByLibrary.simpleMessage("Возврат"),
     "refundReceiptBody": MessageLookupByLibrary.simpleMessage(
       "Сервер сторнирует начисление и вернёт списанные баллы.",
@@ -266,7 +275,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "statusCommitted": MessageLookupByLibrary.simpleMessage("проведён"),
     "statusRefunded": MessageLookupByLibrary.simpleMessage("возврат"),
     "store": MessageLookupByLibrary.simpleMessage("Точка"),
-    "storeIdLabel": m14,
+    "storeIdLabel": m15,
     "storeNameHint": MessageLookupByLibrary.simpleMessage("Название"),
     "storeNameRequired": MessageLookupByLibrary.simpleMessage(
       "Название обязательно",
@@ -288,7 +297,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tabTeam": MessageLookupByLibrary.simpleMessage("Команда"),
     "unblock": MessageLookupByLibrary.simpleMessage("Разблокировать"),
     "updateApp": MessageLookupByLibrary.simpleMessage("Обнови приложение"),
-    "updateAppBody": m15,
+    "updateAppBody": m16,
     "willEarn": MessageLookupByLibrary.simpleMessage("Начислим"),
   };
 }

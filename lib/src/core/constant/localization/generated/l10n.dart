@@ -179,6 +179,11 @@ class AppLocalizations {
     return Intl.message('Чек', name: 'receipt', desc: '', args: []);
   }
 
+  /// `Далее`
+  String get next {
+    return Intl.message('Далее', name: 'next', desc: '', args: []);
+  }
+
   /// `Закрыть`
   String get close {
     return Intl.message('Закрыть', name: 'close', desc: '', args: []);
@@ -276,6 +281,26 @@ class AppLocalizations {
       name: 'redeemPointsLabel',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Не списывать`
+  String get redeemNone {
+    return Intl.message('Не списывать', name: 'redeemNone', desc: '', args: []);
+  }
+
+  /// `Максимум`
+  String get redeemMax {
+    return Intl.message('Максимум', name: 'redeemMax', desc: '', args: []);
+  }
+
+  /// `Доступно {points} б.`
+  String availablePoints(int points) {
+    return Intl.message(
+      'Доступно $points б.',
+      name: 'availablePoints',
+      desc: '',
+      args: [points],
     );
   }
 
@@ -1162,6 +1187,21 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Скопировать`
+  String get copy {
+    return Intl.message('Скопировать', name: 'copy', desc: '', args: []);
+  }
+
+  /// `Скопировано`
+  String get copied {
+    return Intl.message('Скопировано', name: 'copied', desc: '', args: []);
+  }
+
+  /// `Скопировать QR`
+  String get copyQr {
+    return Intl.message('Скопировать QR', name: 'copyQr', desc: '', args: []);
   }
 
   /// `К покупке`
